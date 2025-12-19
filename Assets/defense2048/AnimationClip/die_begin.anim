@@ -1,0 +1,97 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!74 &7400000
+AnimationClip:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: die_begin
+  m_Legacy: 0
+  m_Compressed: 0
+  m_UseHighQualityCurve: 1
+  m_RotationCurves: []
+  m_CompressedRotationCurves: []
+  m_EulerCurves: []
+  m_PositionCurves: []
+  m_ScaleCurves: []
+  m_FloatCurves: []
+  m_PPtrCurves:
+  - serializedVersion: 2
+    curve:
+    - time: 0
+      value: {fileID: 21300000, guid: 5e5c5cca029a4254599476611ecc3473, type: 2}
+    - time: 0.083333336
+      value: {fileID: 21300000, guid: 4827a0d81e7b44d4682dd1e621897dd3, type: 2}
+    - time: 0.16666667
+      value: {fileID: 21300000, guid: 53626fee7ee27ee45b0930c8521e9a4a, type: 2}
+    - time: 0.25
+      value: {fileID: 21300000, guid: 2ba561bfbce0f5a489ffc5f995ac32df, type: 2}
+    - time: 0.33333334
+      value: {fileID: 21300000, guid: 2811a1e96fc78ad4d99bd2c0475e2834, type: 2}
+    - time: 0.4166667
+      value: {fileID: 21300000, guid: c211d5a4d2558f044a87d1baa2632b5c, type: 2}
+    - time: 0.5
+      value: {fileID: 21300000, guid: 4642e86017ce0914f8250df70df4da6e, type: 2}
+    attribute: m_Sprite
+    path:
+    classID: 212
+    script: {fileID: 0}
+    flags: 2
+  m_SampleRate: 12
+  m_WrapMode: 0
+  m_Bounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  m_ClipBindingConstant:
+    genericBindings:
+    - serializedVersion: 2
+      path: 0
+      attribute: 0
+      script: {fileID: 0}
+      typeID: 212
+      customType: 23
+      isPPtrCurve: 1
+      isIntCurve: 0
+      isSerializeReferenceCurve: 0
+    pptrCurveMapping:
+    - {fileID: 21300000, guid: 5e5c5cca029a4254599476611ecc3473, type: 2}
+    - {fileID: 21300000, guid: 4827a0d81e7b44d4682dd1e621897dd3, type: 2}
+    - {fileID: 21300000, guid: 53626fee7ee27ee45b0930c8521e9a4a, type: 2}
+    - {fileID: 21300000, guid: 2ba561bfbce0f5a489ffc5f995ac32df, type: 2}
+    - {fileID: 21300000, guid: 2811a1e96fc78ad4d99bd2c0475e2834, type: 2}
+    - {fileID: 21300000, guid: c211d5a4d2558f044a87d1baa2632b5c, type: 2}
+    - {fileID: 21300000, guid: 4642e86017ce0914f8250df70df4da6e, type: 2}
+  m_AnimationClipSettings:
+    serializedVersion: 2
+    m_AdditiveReferencePoseClip: {fileID: 0}
+    m_AdditiveReferencePoseTime: 0
+    m_StartTime: 0
+    m_StopTime: 0.5833333
+    m_OrientationOffsetY: 0
+    m_Level: 0
+    m_CycleOffset: 0
+    m_HasAdditiveReferencePose: 0
+    m_LoopTime: 0
+    m_LoopBlend: 0
+    m_LoopBlendOrientation: 0
+    m_LoopBlendPositionY: 0
+    m_LoopBlendPositionXZ: 0
+    m_KeepOriginalOrientation: 0
+    m_KeepOriginalPositionY: 1
+    m_KeepOriginalPositionXZ: 0
+    m_HeightFromFeet: 0
+    m_Mirror: 0
+  m_EditorCurves: []
+  m_EulerEditorCurves: []
+  m_HasGenericRootTransform: 0
+  m_HasMotionFloatCurves: 0
+  m_Events:
+  - time: 0
+    functionName: EventShowDeadDialog
+    data:
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0

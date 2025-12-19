@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 426fa0acdf1db4307ad2b4a71fe2b55a, type: 3}
+  m_Name: Canh_1
+  m_EditorClassIdentifier: 
+  LevelIndex: 1
+  waves:
+  - enemies:
+    - EnemyType: {fileID: 11400000, guid: 44ff83f3c05fb43938624c1982939ae7, type: 2}
+      count: 5
+      spawnDelay: 2
+    - EnemyType: {fileID: 11400000, guid: 31847256c42b849c5bd32fa13cec23b7, type: 2}
+      count: 4
+      spawnDelay: 3
