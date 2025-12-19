@@ -4,11 +4,11 @@ using UnityEngine;
 public class EnemyAnimation : MonoBehaviour
 {
     public Animator animator;
-    
+
     private Vector2 lastPosition;
     private string currentTrigger;
     private bool isAttacking;
-    
+
     void Awake()
     {
         animator = GetComponent<Animator>();
@@ -17,28 +17,28 @@ public class EnemyAnimation : MonoBehaviour
 
     private void Update()
     {
-        if(isAttacking)return;
+        if (isAttacking) return;
         Vector2 currentPos = transform.position;
         Vector2 direction = currentPos - lastPosition;
-        
-        if(direction.sqrMagnitude<0.0001f)return;
-        
+
+        if (direction.sqrMagnitude < 0.0001f) return;
+
         string nextTrigger;
-        
+
         if (Mathf.Abs(direction.y) > Mathf.Abs(direction.x))
         {
             nextTrigger = direction.y < 0 ? "move_down" : "move_up";
-           
+
         }
         else
         {
-            
+
             nextTrigger = "move";
         }
 
         if (currentTrigger != nextTrigger)
         {
-            animator.ResetTrigger(currentTrigger);
+            //animator.ResetTrigger(currentTrigger);
             animator.SetTrigger(nextTrigger);
             currentTrigger = nextTrigger;
         }
@@ -48,10 +48,10 @@ public class EnemyAnimation : MonoBehaviour
 
     public void PlayAttack()
     {
-        if(isAttacking)return;
+        if (isAttacking) return;
 
         isAttacking = true;
-        animator.ResetTrigger(currentTrigger);
+        //animator.ResetTrigger(currentTrigger);
         animator.SetTrigger("attack");
         currentTrigger = "attack";
     }

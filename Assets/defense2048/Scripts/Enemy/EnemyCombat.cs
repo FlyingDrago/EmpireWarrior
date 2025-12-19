@@ -10,10 +10,14 @@ public class EnemyCombat : MonoBehaviour
 
     private float lastAttackTime;
     private EnemyAnimation enemyAnim;
+    private EnemyMove enemyMove;
+
+    public bool HasTarget { get; private set; }
 
     void Awake()
     {
         enemyAnim = GetComponent<EnemyAnimation>();
+        enemyMove = GetComponent<EnemyMove>();
     }
 
     void Update()
@@ -25,12 +29,20 @@ public class EnemyCombat : MonoBehaviour
 
         if (target != null)
         {
+            HasTarget = true;
+            enemyMove.StopMove();
+
             lastAttackTime = Time.time;
             enemyAnim.PlayAttack();
         }
+        else
+        {
+            HasTarget = false;
+                        enemyMove.ResumeMove();
+        }
     }
 
-    // GỌI BẰNG ANIMATION EVENT
+
     public void DealDamage()
     {
         DefenseHealth target = FindDefense();

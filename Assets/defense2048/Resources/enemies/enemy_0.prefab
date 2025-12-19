@@ -287,8 +287,6 @@ MonoBehaviour:
   pathPoints: []
   _currentIndex: 0
   enemyAnim: {fileID: 8048242808685209739}
-  waypoints: []
-  currentIndex: 0
 --- !u!114 &4575928989037314826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -341,7 +339,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: 0
-  attackRange: 0.5
+  attackRange: 0.2
   attackCooldown: 1.5
   damage: 1
 --- !u!1 &1851217705309146
