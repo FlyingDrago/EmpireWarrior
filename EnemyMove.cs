@@ -51,7 +51,7 @@ public class EnemyMove : MonoBehaviour
 
     void Update()
     {
-        if(!canMove)return;
+        if (!canMove) return;
         if (pathPoints == null || _currentIndex >= pathPoints.Count)
             return;
 

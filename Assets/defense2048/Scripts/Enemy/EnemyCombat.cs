@@ -1,18 +1,27 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyCombat : MonoBehaviour
 {
     public Team team;
 
+    public float detectRange = 1.8f;
     public float attackRange = 1.2f;
+    public float alignOffset = 0.5f;
     public float attackCooldown = 1.5f;
     public int damage = 1;
 
     private float lastAttackTime;
+
     private EnemyAnimation enemyAnim;
     private EnemyMove enemyMove;
 
-    public bool HasTarget { get; private set; }
+    private DefenseHealth target;
+    private Transform soldier;
+
+    public CombatState state = CombatState.Walking;
+
+    public bool HasTarget => target != null;
+    public bool IsLocked { get; private set; }
 
     void Awake()
     {
@@ -22,41 +31,95 @@ public class EnemyCombat : MonoBehaviour
 
     void Update()
     {
-        if (enemyAnim.IsAttacking) return;
-        if (Time.time < lastAttackTime + attackCooldown) return;
-
-        DefenseHealth target = FindDefense();
-
-        if (target != null)
+        if (soldier != null)
+            FaceTarget(transform, soldier);
+        switch (state)
         {
-            HasTarget = true;
-            enemyMove.StopMove();
+            case CombatState.Walking:
+                DetectDefense();
+                break;
 
-            lastAttackTime = Time.time;
-            enemyAnim.PlayAttack();
+            case CombatState.Waiting:
+                // đứng im, chờ soldier
+                break;
+
+           
+
+            case CombatState.Attacking:
+                HandleAttack();
+                break;
         }
-        else
+        if (state != CombatState.Walking && target == null)
         {
-            HasTarget = false;
-                        enemyMove.ResumeMove();
+            if (soldier != null)
+                soldier.GetComponent<SoldierMove>()?.ClearTarget();
+
+            state = CombatState.Walking;
+            IsLocked = false;
+            enemyMove.ResumeMove();
+        }
+    }
+    public void OnDead()
+    {
+        if (soldier != null)
+        {
+            SoldierMove sm = soldier.GetComponent<SoldierMove>();
+            if (sm != null)
+                sm.ClearTarget();
+        }
+
+        soldier = null;
+        target = null;
+        IsLocked = false;
+
+        enemyMove.ResumeMove();
+    }
+
+    void DetectDefense()
+    {
+        if (IsLocked) return;
+
+        target = FindDefense();
+
+        if (target != null && !target.IsBusy)
+        {
+            IsLocked = true;
+            target.LockTarget(this);
+
+            enemyMove.StopMove();
+            state = CombatState.Waiting;
         }
     }
 
+    public void OnSoldierArrived(Transform soldierTf)
+    {
+        soldier = soldierTf;
+        state = CombatState.Attacking; 
+    }
+
+      
+    
+
+    void HandleAttack()
+    {
+        if (enemyAnim.IsAttacking) return;
+        if (Time.time < lastAttackTime + attackCooldown) return;
+
+        lastAttackTime = Time.time;
+        enemyAnim.PlayAttack();
+    }
 
     public void DealDamage()
     {
-        DefenseHealth target = FindDefense();
         if (target != null)
-        {
             target.TakeDamage(damage);
-        }
     }
 
     DefenseHealth FindDefense()
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
-            attackRange,
+            detectRange,
             LayerMask.GetMask("Defense")
         );
 
@@ -69,4 +132,29 @@ public class EnemyCombat : MonoBehaviour
 
         return null;
     }
+
+    public void OnTargetDead()
+    {
+        IsLocked = false;
+        target = null;
+
+        state = CombatState.Walking;
+        enemyMove.ResumeMove();
+    }
+    public static void FaceTarget(Transform self, Transform target)
+    {
+        if (!self || !target) return;
+
+        Vector3 scale = self.localScale;
+
+        if (self.position.x > target.position.x)
+            scale.x = Mathf.Abs(scale.x);   // quay sang phải
+        else
+            scale.x = -Mathf.Abs(scale.x);  // quay sang trái
+
+        self.localScale = scale;
+    }
+
+
+
 }
