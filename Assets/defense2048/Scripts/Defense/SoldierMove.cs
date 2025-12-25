@@ -7,22 +7,30 @@ using UnityEngine;
 public class SoldierMove : MonoBehaviour
 {
     public float speed = 3f;
-    public float combatOffset = 0.6f; // khoảng cách đứng ngang
+    public float combatOffset = 0.6f; 
 
     private Transform enemy;
     private bool isMoving;
     private bool hasTarget;
 
+    private SoldierAnimation soldierAnim;
+
+    private void Awake()
+    {
+        soldierAnim = GetComponent<SoldierAnimation>();
+    }
+
     void Update()
     {
-        if (!isMoving || enemy == null) return;
+        if(!isMoving)return;
         FaceTarget(transform, enemy);
-        if (hasTarget && enemy == null)
+        if (enemy == null)
         {
             ClearTarget();
+            return;
         }
 
-        // 🔥 TÍNH VỊ TRÍ ĐỨNG NGANG
+        // TÍNH VỊ TRÍ ĐỨNG NGANG
         Vector3 targetPos = enemy.position;
 
         // đứng lệch sang trái hoặc phải enemy
@@ -31,7 +39,7 @@ public class SoldierMove : MonoBehaviour
         else
             targetPos.x = enemy.position.x + combatOffset;
 
-        // cùng hàng Y (2D nhìn đẹp)
+        // cùng hàng Y 
         targetPos.y = enemy.position.y;
 
         transform.position = Vector3.MoveTowards(
@@ -44,6 +52,7 @@ public class SoldierMove : MonoBehaviour
         if (Vector3.Distance(transform.position, targetPos) < 0.05f)
         {
             isMoving = false;
+            soldierAnim.PlayIdle();
             enemy.GetComponent<EnemyCombat>().OnSoldierArrived(transform);
         }
     }
@@ -55,12 +64,16 @@ public class SoldierMove : MonoBehaviour
         enemy = enemyTf;
         hasTarget = true;
         isMoving = true;
+        
+        soldierAnim.PlayMove();
     }
 
     public void ClearTarget()
     {
         enemy = null;
         hasTarget = false;
+        isMoving = false;
+        soldierAnim.PlayIdle();
     }
     public static void FaceTarget(Transform self, Transform target)
     {

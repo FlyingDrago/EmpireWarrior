@@ -61,5 +61,10 @@ public class EnemyAnimation : MonoBehaviour
         isAttacking = false;
     }
 
+    public void PlayIdle()
+    {
+        animator.SetTrigger("idle");
+    }
+
     public bool IsAttacking => isAttacking;
 }

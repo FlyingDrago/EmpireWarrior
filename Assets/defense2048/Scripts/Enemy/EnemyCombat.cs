@@ -6,17 +6,18 @@ public class EnemyCombat : MonoBehaviour
 
     public float detectRange = 1.8f;
     public float attackRange = 1.2f;
-    public float alignOffset = 0.5f;
     public float attackCooldown = 1.5f;
     public int damage = 1;
 
     private float lastAttackTime;
+    private float moveDirX;
 
     private EnemyAnimation enemyAnim;
     private EnemyMove enemyMove;
 
     private DefenseHealth target;
     private Transform soldier;
+    private EnemyHeath _enemyHeath;
 
     public CombatState state = CombatState.Walking;
 
@@ -27,6 +28,7 @@ public class EnemyCombat : MonoBehaviour
     {
         enemyAnim = GetComponent<EnemyAnimation>();
         enemyMove = GetComponent<EnemyMove>();
+        _enemyHeath = GetComponent<EnemyHeath>();
     }
 
     void Update()
@@ -61,16 +63,30 @@ public class EnemyCombat : MonoBehaviour
     }
     public void OnDead()
     {
+        if (target != null)
+        {
+            target.Unlock();
+            
+        }
+        RestoreMoveDirection();
         if (soldier != null)
         {
+            SoldierCombat sc = soldier.GetComponent<SoldierCombat>();
+            if (sc != null)
+            {
+                sc.StopCombat();
+            }
+            
             SoldierMove sm = soldier.GetComponent<SoldierMove>();
             if (sm != null)
                 sm.ClearTarget();
         }
+      
 
         soldier = null;
         target = null;
         IsLocked = false;
+        state = CombatState.Walking;
 
         enemyMove.ResumeMove();
     }
@@ -78,7 +94,7 @@ public class EnemyCombat : MonoBehaviour
     void DetectDefense()
     {
         if (IsLocked) return;
-
+       
         target = FindDefense();
 
         if (target != null && !target.IsBusy)
@@ -88,13 +104,30 @@ public class EnemyCombat : MonoBehaviour
 
             enemyMove.StopMove();
             state = CombatState.Waiting;
+            enemyAnim.PlayIdle();
+            
         }
     }
 
     public void OnSoldierArrived(Transform soldierTf)
     {
         soldier = soldierTf;
-        state = CombatState.Attacking; 
+        state = CombatState.Attacking;
+
+        SoldierCombat sc = soldier.GetComponent<SoldierCombat>();
+       
+        if (sc != null)
+        {
+            
+            sc.StartCombat(target);
+        }
+    }
+
+    void RestoreMoveDirection()
+    {
+        Vector3 scale = transform.localScale;
+        scale.x = Mathf.Abs(scale.x) * moveDirX;
+        transform.localScale = scale;
     }
 
       
@@ -102,6 +135,7 @@ public class EnemyCombat : MonoBehaviour
 
     void HandleAttack()
     {
+        if(soldier!=null)FaceTarget(transform,soldier);
         if (enemyAnim.IsAttacking) return;
         if (Time.time < lastAttackTime + attackCooldown) return;
 
@@ -111,8 +145,8 @@ public class EnemyCombat : MonoBehaviour
 
     public void DealDamage()
     {
-        if (target != null)
-            target.TakeDamage(damage);
+        if (_enemyHeath != null)
+            _enemyHeath.TakeDamage(damage);
     }
 
     DefenseHealth FindDefense()
@@ -125,6 +159,7 @@ public class EnemyCombat : MonoBehaviour
 
         foreach (var hit in hits)
         {
+           
             DefenseHealth defense = hit.GetComponent<DefenseHealth>();
             if (defense != null)
                 return defense;

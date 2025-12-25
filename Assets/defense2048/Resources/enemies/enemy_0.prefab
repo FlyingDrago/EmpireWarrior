@@ -299,7 +299,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1f3c7bf6585d40d885136de1b4e2b45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 100
+  maxHp: 5
 --- !u!114 &9107883835803227301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -341,7 +341,6 @@ MonoBehaviour:
   team: 0
   detectRange: 0.8
   attackRange: 0.2
-  alignOffset: 0.5
   attackCooldown: 1.5
   damage: 1
   state: 0

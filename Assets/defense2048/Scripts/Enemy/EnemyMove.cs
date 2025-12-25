@@ -51,32 +51,45 @@ public class EnemyMove : MonoBehaviour
 
     void Update()
     {
-        if(!canMove)return;
+        if (!canMove) return;
         if (pathPoints == null || _currentIndex >= pathPoints.Count)
             return;
-
-
 
         Transform point = pathPoints[_currentIndex];
         Vector3 target = point.position;
 
+        // 👉 FLIP THEO HƯỚNG MOVE
+        UpdateFacing(target);
+
         transform.position = Vector3.MoveTowards(
-          transform.position,
-          target,
-          speed * Time.deltaTime
+            transform.position,
+            target,
+            speed * Time.deltaTime
         );
 
         if (Vector3.Distance(transform.position, target) < 0.05f)
         {
-
             _currentIndex++;
 
             if (_currentIndex >= pathPoints.Count)
-            {
                 ReachEnd();
-            }
         }
     }
+
+    void UpdateFacing(Vector3 target)
+    {
+        Vector3 scale = transform.localScale;
+
+        if (target.x < transform.position.x)
+            scale.x = Mathf.Abs(scale.x);
+        else
+            scale.x = -Mathf.Abs(scale.x);
+
+        transform.localScale = scale;
+    }
+
+
+ 
 
     void ReachEnd()
     {

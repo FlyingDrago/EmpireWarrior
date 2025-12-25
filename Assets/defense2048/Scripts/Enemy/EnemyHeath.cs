@@ -7,12 +7,14 @@ public class EnemyHeath : MonoBehaviour
 {
     public int maxHp = 100;
     private int _currentHp;
+    private EnemyCombat Combat;
 
     private EnemyMove EnemyMove;
 
     private void Awake()
     {
         EnemyMove = GetComponent<EnemyMove>();
+        Combat = GetComponent<EnemyCombat>();
     }
 
     void OnEnable()
@@ -30,8 +32,14 @@ public class EnemyHeath : MonoBehaviour
 
     void Die()
     {
+        if (Combat != null)
+        {
+           
+            Combat.OnDead();
+        }
         EnemyPool.Instance.ReturnEnemy(gameObject);
     }
+    
 
     public void Init(EnemyType data)
     {
