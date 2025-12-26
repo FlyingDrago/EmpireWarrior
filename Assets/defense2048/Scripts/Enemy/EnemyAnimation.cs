@@ -51,10 +51,20 @@ public class EnemyAnimation : MonoBehaviour
         if (isAttacking) return;
 
         isAttacking = true;
-        //animator.ResetTrigger(currentTrigger);
+        
         animator.SetTrigger("attack");
         currentTrigger = "attack";
     }
+    public void PlayAttack2()
+    {
+        if (isAttacking) return;
+
+        isAttacking = true;
+        animator.ResetTrigger("attack_range");
+        animator.SetTrigger("attack_range");
+        currentTrigger = "attack_range";
+    }
+    
 
     public void OnAttackEnd()
     {

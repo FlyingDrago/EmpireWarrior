@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-
 public class EnemyMove : MonoBehaviour
 {
     public float speed = 2f;
@@ -13,23 +12,23 @@ public class EnemyMove : MonoBehaviour
     public int _currentIndex;
 
     public EnemyAnimation enemyAnim;
+    
 
     private bool canMove = true;
-
-
 
 
     private void Awake()
     {
         enemyAnim = GetComponent<EnemyAnimation>();
-
+     
     }
+
     public void Init(EnemyType data, List<Transform> path)
     {
         speed = data.speed;
         SetPath(path);
-
     }
+
     public void SetPath(List<Transform> points)
     {
         pathPoints = points;
@@ -38,6 +37,7 @@ public class EnemyMove : MonoBehaviour
 
         gameObject.SetActive(true);
     }
+
     public void StopMove()
     {
         canMove = false;
@@ -52,13 +52,14 @@ public class EnemyMove : MonoBehaviour
     void Update()
     {
         if (!canMove) return;
+        
         if (pathPoints == null || _currentIndex >= pathPoints.Count)
             return;
 
         Transform point = pathPoints[_currentIndex];
         Vector3 target = point.position;
 
-        // 👉 FLIP THEO HƯỚNG MOVE
+
         UpdateFacing(target);
 
         transform.position = Vector3.MoveTowards(
@@ -89,13 +90,8 @@ public class EnemyMove : MonoBehaviour
     }
 
 
- 
-
     void ReachEnd()
     {
         EnemyPool.Instance.ReturnEnemy(gameObject);
     }
-
-
-
 }
