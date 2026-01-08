@@ -149,7 +149,7 @@ public class EnemyShooter : MonoBehaviour
         EnemyBullet bullet = bulletObj.GetComponent<EnemyBullet>();
         if (bullet != null)
         {
-            bullet.Init(currentTarget, damage, bulletSpeed);
+            bullet.Init(EnemyCombat,currentTarget, damage, bulletSpeed);
             bullet.SetHitEffect(hitEffectPrefab);
         }
     }

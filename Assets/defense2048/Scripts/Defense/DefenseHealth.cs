@@ -35,7 +35,7 @@ public abstract class DefenseHealth : MonoBehaviour
     }
     public void LockTarget(EnemyCombat enemy)
     {
-        if (IsBusy) return;
+      
 
         IsBusy = true;
         lockedEnemy = enemy;

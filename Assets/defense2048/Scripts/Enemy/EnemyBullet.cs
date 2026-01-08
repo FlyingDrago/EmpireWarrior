@@ -16,18 +16,25 @@ public class EnemyBullet : MonoBehaviour
     [Header("Lifetime")]
     [SerializeField] private float lifetime = 5f;
 
+    private EnemyCombat attacker;
+    
+
     void Start()
     {
         Destroy(gameObject, lifetime);
     }
 
     // 🔹 Init khi bắn
-    public void Init(Transform target, int damage, float speed)
+    
+
+    public void Init(EnemyCombat attacker, Transform target, int damage, float speed)
     {
+        this.attacker = attacker;
         this.target = target;
         this.damage = damage;
         this.speed = speed;
     }
+
 
     void Update()
     {
@@ -51,23 +58,22 @@ public class EnemyBullet : MonoBehaviour
         {
             HitTarget(targetPos);
         }
+        
     }
 
     void HitTarget(Vector2 hitPosition)
     {
-        // Gây damage
-        DefenseHealth defenseHealth = target.GetComponent<DefenseHealth>();
+        DefenseHealth defenseHealth = target.GetComponentInParent<DefenseHealth>();
+
         if (defenseHealth != null)
         {
             defenseHealth.TakeDamage(damage);
         }
 
-        // Spawn effect
         SpawnHitEffect(hitPosition);
-
-        // Hủy bullet
         Destroy(gameObject);
     }
+
 
     void SpawnHitEffect(Vector2 position)
     {

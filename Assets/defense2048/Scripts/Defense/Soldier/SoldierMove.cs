@@ -15,6 +15,10 @@ public class SoldierMove : MonoBehaviour
 
     private SoldierAnimation soldierAnim;
 
+    private Transform tower;
+    private Vector3 formationOffset;
+    private bool returningToFormation;
+
     private void Awake()
     {
         soldierAnim = GetComponent<SoldierAnimation>();
@@ -22,6 +26,14 @@ public class SoldierMove : MonoBehaviour
 
     void Update()
     {
+        if (returningToFormation)
+        {
+            ReturnToFormation();
+            return;
+        }
+        
+        
+        
         if(!isMoving)return;
         FaceTarget(transform, enemy);
         if (enemy == null)
@@ -73,7 +85,7 @@ public class SoldierMove : MonoBehaviour
         enemy = null;
         hasTarget = false;
         isMoving = false;
-        soldierAnim.PlayIdle();
+       ReturnFormation();
     }
     public static void FaceTarget(Transform self, Transform target)
     {
@@ -87,5 +99,41 @@ public class SoldierMove : MonoBehaviour
             scale.x = -Mathf.Abs(scale.x);  // quay sang trái
 
         self.localScale = scale;
+    }
+
+    public void SetFormaiton(Transform anchor, Vector3 offset)
+    {
+        tower = anchor;
+        formationOffset = offset;
+        
+    }
+
+    public void ReturnFormation()
+    {
+        if(tower==null)return;
+
+        enemy = null;
+        hasTarget = false;
+        isMoving = false;
+        returningToFormation = true;
+        
+        soldierAnim.PlayMove();
+  
+
+    }
+
+    public void ReturnToFormation()
+    {
+        Vector3 targetPos = tower.position + formationOffset;
+
+        transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
+
+        if (Vector3.Distance(transform.position, targetPos) < 0.05f)
+        {
+            returningToFormation = false;
+            soldierAnim.PlayIdle();
+        }
+        
+
     }
 }
