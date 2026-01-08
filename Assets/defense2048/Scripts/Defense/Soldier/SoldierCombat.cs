@@ -11,7 +11,7 @@ public class SoldierCombat : MonoBehaviour
     public LayerMask enemyLayer;
 
     private float lastAttackTime;
-    private DefenseHealth enemy;
+    private EnemyCombat enemy;
     private SoldierAnimation SoldierAnimation;
     
 
@@ -20,7 +20,7 @@ public class SoldierCombat : MonoBehaviour
         SoldierAnimation = GetComponent<SoldierAnimation>();
     }
 
-    public void StartCombat(DefenseHealth enemyCombat)
+    public void StartCombat(EnemyCombat enemyCombat)
     {
         enemy = enemyCombat;
     }
@@ -58,7 +58,7 @@ public class SoldierCombat : MonoBehaviour
         if (enemy != null)
         {
            
-            enemy.TakeDamage(damage);
+            enemy.GetComponent<EnemyHeath>()?.TakeDamage(damage);
         }
     }
 

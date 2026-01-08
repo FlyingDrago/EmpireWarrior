@@ -42,6 +42,7 @@ GameObject:
   - component: {fileID: 4847058725384407}
   - component: {fileID: 212857236126659107}
   - component: {fileID: 95687478273941925}
+  - component: {fileID: 2665627574390678512}
   m_Layer: 0
   m_Name: mage_0
   m_TagString: Untagged
@@ -103,8 +104,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 2de53ea1073be1441846a7a1f3edeb01, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -138,6 +139,25 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2665627574390678512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1348297903977600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8d77aa0b0f844038817e2c5d9b13687, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 3
+  attackCooldown: 1.5
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  spellPrefab: {fileID: 1031275767237185, guid: 803df0dee5f60ff47afa7d2d60ec25aa, type: 3}
+  firePoint: {fileID: 4931587611539029}
 --- !u!1 &1793723078899827
 GameObject:
   m_ObjectHideFlags: 0
@@ -280,8 +300,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 3ab904dda7e679f43a019fb6ce7ae11d, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -302,7 +322,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1960258503553964}
-  m_Enabled: 0
+  m_Enabled: 1
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 7f009c596a778824c846e300393b931d, type: 2}
   m_CullingMode: 0
@@ -368,8 +388,8 @@ SortingGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1960258503553964}
   m_Enabled: 1
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_SortAtRoot: 0
 --- !u!1 &1987724795943621
@@ -443,8 +463,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 4c306d6946244844292810dca71dccfa, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

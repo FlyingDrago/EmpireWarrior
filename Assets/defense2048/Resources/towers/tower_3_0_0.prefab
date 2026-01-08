@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 95714942659927366}
   - component: {fileID: 61454404010558500}
   - component: {fileID: 210580578443829094}
+  - component: {fileID: 3854871272258836430}
   m_Layer: 9
   m_Name: tower_3_0_0
   m_TagString: tower
@@ -106,8 +107,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: bdd52904685e6dd4a849588f283840ff, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -194,10 +195,30 @@ SortingGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1565732321838428}
   m_Enabled: 1
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_SortAtRoot: 0
+--- !u!114 &3854871272258836430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1565732321838428}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cdb73ab3c26847afab53f37442995cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 4
+  attackCooldown: 4
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  firePoint: {fileID: 4003794350808813}
+  rockBulletPrefab: {fileID: 1386678306386784, guid: 8c48e076af1bd4348944172cb8a77944, type: 3}
+  animator: {fileID: 0}
 --- !u!1 &1819737856841145
 GameObject:
   m_ObjectHideFlags: 0

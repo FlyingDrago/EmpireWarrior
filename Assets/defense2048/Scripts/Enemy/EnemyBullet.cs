@@ -1,68 +1,92 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyBullet : MonoBehaviour
 {
-    [SerializeField] private int damage = 1;
-    [SerializeField] private float lifetime = 3f;
+    private Transform target;
+    private int damage;
+    private float speed;
 
-    [Header("Impact Effects")] 
+    [Header("Hit Settings")]
+    [SerializeField] private float hitDistance = 0.1f;
+
+    [Header("Effect")]
     [SerializeField] private GameObject hitEffectPrefab;
-
     [SerializeField] private float effectLifetime = 1f;
 
-    private void Start()
+    [Header("Lifetime")]
+    [SerializeField] private float lifetime = 5f;
+
+    void Start()
     {
-        Destroy(gameObject,lifetime);
+        Destroy(gameObject, lifetime);
     }
 
-    public void SetDamage(int dmg)
+    // 🔹 Init khi bắn
+    public void Init(Transform target, int damage, float speed)
     {
-        damage = dmg;
+        this.target = target;
+        this.damage = damage;
+        this.speed = speed;
     }
 
-    public void SetEffect(GameObject hitEffect)
+    void Update()
     {
-        hitEffectPrefab = hitEffect;
-    }
-
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        // Kiểm tra nếu trúng Defense
-        if (other.CompareTag("Defense"))
+        if (target == null)
         {
-            Debug.Log($"Bullet hit: {other.name}");
-
-            // Gây sát thương
-            DefenseHealth defenseHealth = other.GetComponent<DefenseHealth>();
-            if (defenseHealth != null)
-            {
-                defenseHealth.TakeDamage(damage);
-            }
-            CreateHitEffect(hitEffectPrefab,other.ClosestPoint(transform.position));
-
-            // Hủy đạn
             Destroy(gameObject);
+            return;
+        }
+
+        Vector2 targetPos = GetTargetCenter(target);
+
+        // Bay tới mục tiêu
+        transform.position = Vector2.MoveTowards(
+            transform.position,
+            targetPos,
+            speed * Time.deltaTime
+        );
+
+        // Check trúng
+        if (Vector2.Distance(transform.position, targetPos) <= hitDistance)
+        {
+            HitTarget(targetPos);
         }
     }
-    void CreateHitEffect(GameObject effectPrefab, Vector2 position)
+
+    void HitTarget(Vector2 hitPosition)
     {
-        if (effectPrefab != null)
+        // Gây damage
+        DefenseHealth defenseHealth = target.GetComponent<DefenseHealth>();
+        if (defenseHealth != null)
         {
-            GameObject effect = Instantiate(effectPrefab, position, Quaternion.identity);
-            
-            
-            Destroy(effect, effectLifetime);
-            
-            // Xoay effect theo hướng bắn (nếu cần)
-            // effect.transform.up = GetComponent<Rigidbody2D>().velocity.normalized;
+            defenseHealth.TakeDamage(damage);
         }
-        else
-        {
-            Debug.LogWarning("Hit effect prefab is not assigned!");
-        }
+
+        // Spawn effect
+        SpawnHitEffect(hitPosition);
+
+        // Hủy bullet
+        Destroy(gameObject);
     }
-    
+
+    void SpawnHitEffect(Vector2 position)
+    {
+        if (hitEffectPrefab == null) return;
+
+        GameObject effect = Instantiate(hitEffectPrefab, position, Quaternion.identity);
+        Destroy(effect, effectLifetime);
+    }
+
+    Vector2 GetTargetCenter(Transform target)
+    {
+        Transform marker = target.Find("CenterMarker");
+        if (marker != null)
+            return marker.position;
+
+        return target.position;
+    }
+    public void SetHitEffect(GameObject effect)
+    {
+        hitEffectPrefab = effect;
+    }
 }

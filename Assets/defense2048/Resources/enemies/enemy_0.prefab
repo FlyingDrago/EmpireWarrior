@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4817176488586766}
   - component: {fileID: 212424231030596087}
+  - component: {fileID: 86077009258433897}
   m_Layer: 7
   m_Name: HealthBarFrame
   m_TagString: Untagged
@@ -85,6 +86,20 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &86077009258433897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1016972053158603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 397ff97f9532d4e90b0e86dccdca6895, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fillBar: {fileID: 4817608069797272}
+  health: {fileID: 4575928989037314826}
 --- !u!1 &1024885223779997
 GameObject:
   m_ObjectHideFlags: 0
@@ -165,7 +180,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -257466439
-  m_SortingLayer: 1
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 65d587f97a8aef94baeebbfdf07fcaaa, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

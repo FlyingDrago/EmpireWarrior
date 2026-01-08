@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4105951046596843}
   - component: {fileID: 58364776985944443}
-  m_Layer: 13
+  m_Layer: 7
   m_Name: range
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -76,7 +76,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4763326903201125}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: HealthBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -109,7 +109,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4599375165976094}
   - component: {fileID: 212652729552184608}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Health
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -201,7 +201,8 @@ GameObject:
   - component: {fileID: 5615296655023432988}
   - component: {fileID: 7032044963018225330}
   - component: {fileID: 3176339506275613552}
-  m_Layer: 8
+  - component: {fileID: 2347473100267140709}
+  m_Layer: 7
   m_Name: enemy_1
   m_TagString: enemy
   m_Icon: {fileID: 0}
@@ -265,7 +266,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -257466439
-  m_SortingLayer: 1
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 936f313bfc6410f4aaa455ba43e3dc7c, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -438,16 +439,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18e29faab8d604a7ca8188cc53519524, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AttackRange: 5
+  _collider2Ds: []
+  attackRange: 1.5
   attackCooldown: 1.5
   damage: 1
   bulletPrefab: {fileID: 1642677494313038, guid: b22dc27657d310b4b948e268852e6aaf, type: 3}
   firePoint: {fileID: 5583672441347008968}
-  bulletSpeeed: 8
+  bulletSpeed: 8
   targetLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
+  animator: {fileID: 0}
+  attackAnimationName: attack_left_2
+  idleAnimationName: idle
+  hitEffectPrefab: {fileID: 1088625214339013, guid: 9a750e7e370878f4e8a1bab682feeb59, type: 3}
   currentTarget: {fileID: 0}
+  lastAttackTime: 0
+  isAttacking: 0
+--- !u!114 &2347473100267140709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1829013155934455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c63fe2559eb541baa8a513dc6faa02d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  team: 0
+  detectRange: 1.8
+  attackRange: 1.2
+  attackCooldown: 1.5
+  damage: 1
+  state: 0
 --- !u!1 &1956853410678064
 GameObject:
   m_ObjectHideFlags: 0
@@ -458,7 +484,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4458114560835913}
   - component: {fileID: 212116909129640798}
-  m_Layer: 0
+  - component: {fileID: 4467147316617980228}
+  m_Layer: 7
   m_Name: HealthBarFrame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -533,6 +560,20 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &4467147316617980228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1956853410678064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 397ff97f9532d4e90b0e86dccdca6895, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fillBar: {fileID: 4763326903201125}
+  health: {fileID: 5729994991940350295}
 --- !u!1 &6817654803561002510
 GameObject:
   m_ObjectHideFlags: 0
@@ -542,7 +583,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5583672441347008968}
-  m_Layer: 8
+  m_Layer: 7
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

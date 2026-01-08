@@ -12,9 +12,9 @@ public class EnemyMove : MonoBehaviour
     public int _currentIndex;
 
     public EnemyAnimation enemyAnim;
-    
 
-    private bool canMove = true;
+    private bool _canMove = true;
+    private bool CanMove => _canMove;
 
 
     private void Awake()
@@ -40,18 +40,19 @@ public class EnemyMove : MonoBehaviour
 
     public void StopMove()
     {
-        canMove = false;
+        
+        _canMove = false;
     }
 
     public void ResumeMove()
     {
-        canMove = true;
+        _canMove = true;
     }
 
 
     void Update()
     {
-        if (!canMove) return;
+        if (!_canMove) return;
         
         if (pathPoints == null || _currentIndex >= pathPoints.Count)
             return;
@@ -88,6 +89,19 @@ public class EnemyMove : MonoBehaviour
 
         transform.localScale = scale;
     }
+
+    public Vector2 GetMoveDirection()
+    {
+        if (pathPoints == null) return Vector2.zero;
+        if (_currentIndex <= 0 || _currentIndex >= pathPoints.Count)
+            return Vector2.zero;
+
+        Vector3 from = pathPoints[_currentIndex - 1].position;
+        Vector3 to = pathPoints[_currentIndex].position;
+
+        return (to - from).normalized;
+    }
+
 
 
     void ReachEnd()

@@ -78,6 +78,7 @@ GameObject:
   - component: {fileID: 4726776306416247}
   - component: {fileID: 212066519346192627}
   - component: {fileID: 95150971919798965}
+  - component: {fileID: 3081120584068833812}
   m_Layer: 0
   m_Name: archer 1
   m_TagString: Untagged
@@ -139,8 +140,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 7a1551098ebd3ee49addac16adb93b6a, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -174,6 +175,29 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &3081120584068833812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1184884073659856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d45faad4c5ac34f2c8e5a4cc4a75edc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 2.5
+  attackCooldowm: 2
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  bulletPrefab: {fileID: 1880168843581737, guid: 713bdcfade1874e4bac8aa8a5c7c4d7a, type: 3}
+  firePoint: {fileID: 4801925820808595}
+  shootPower: 2
+  arcForce: 1
+  archerVisual: {fileID: 4726776306416247}
+  anim: {fileID: 0}
 --- !u!1 &1547362531840254
 GameObject:
   m_ObjectHideFlags: 0
@@ -281,8 +305,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: cf07e44c3676a8a42bd583d7822dd4c6, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -348,8 +372,8 @@ SortingGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1612814355294662}
   m_Enabled: 1
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_SortAtRoot: 0
 --- !u!1 &1683489987659436
@@ -363,6 +387,7 @@ GameObject:
   - component: {fileID: 4917748090577640}
   - component: {fileID: 212255128381403780}
   - component: {fileID: 95697543708439750}
+  - component: {fileID: 4122402177710893416}
   m_Layer: 0
   m_Name: archer 0
   m_TagString: Untagged
@@ -424,8 +449,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 7a1551098ebd3ee49addac16adb93b6a, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -459,6 +484,29 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4122402177710893416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1683489987659436}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d45faad4c5ac34f2c8e5a4cc4a75edc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRange: 2.5
+  attackCooldowm: 2
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  bulletPrefab: {fileID: 1880168843581737, guid: 713bdcfade1874e4bac8aa8a5c7c4d7a, type: 3}
+  firePoint: {fileID: 4585401983341162}
+  shootPower: 2
+  arcForce: 1
+  archerVisual: {fileID: 4917748090577640}
+  anim: {fileID: 0}
 --- !u!1 &1815320219300833
 GameObject:
   m_ObjectHideFlags: 0
@@ -560,8 +608,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 1278650381
-  m_SortingLayer: 0
+  m_SortingLayerID: -257466439
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: a57d6b0f17587fc4f85245b9fb7c6155, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

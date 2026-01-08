@@ -23,6 +23,10 @@ public class EnemyCombat : MonoBehaviour
 
     public bool HasTarget => target != null;
     public bool IsLocked { get; private set; }
+    public bool IsInMeleeCombat => state == CombatState.Attacking;
+    
+    
+
 
     void Awake()
     {
@@ -119,7 +123,7 @@ public class EnemyCombat : MonoBehaviour
         if (sc != null)
         {
             
-            sc.StartCombat(target);
+            sc.StartCombat(this);
         }
     }
 
@@ -145,8 +149,8 @@ public class EnemyCombat : MonoBehaviour
 
     public void DealDamage()
     {
-        if (_enemyHeath != null)
-            _enemyHeath.TakeDamage(damage);
+        if(target!=null)
+            target.TakeDamage(damage);
     }
 
     DefenseHealth FindDefense()

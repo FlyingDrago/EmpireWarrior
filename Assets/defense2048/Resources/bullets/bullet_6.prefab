@@ -12,8 +12,7 @@ GameObject:
   - component: {fileID: 212291849236018277}
   - component: {fileID: 50495116107572333}
   - component: {fileID: 4581579206637029388}
-  - component: {fileID: 3787073679791810759}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: bullet_6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +73,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -257466439
-  m_SortingLayer: 1
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: ab29b6b8f19118543ad8527e11531b4b, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -126,42 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5290af8226c164439b2540ad95b5f9fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 1
-  lifetime: 3
+  hitDistance: 0.1
   hitEffectPrefab: {fileID: 1088625214339013, guid: 9a750e7e370878f4e8a1bab682feeb59, type: 3}
-  effectLifetime: 1
---- !u!58 &3787073679791810759
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1642677494313038}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -0.049772315, y: 0.014028516}
-  serializedVersion: 2
-  m_Radius: 0.032694172
+  effectLifetime: 0.2
+  lifetime: 3

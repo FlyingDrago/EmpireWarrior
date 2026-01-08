@@ -20,14 +20,22 @@ public class EnemyShooter : MonoBehaviour
     public Animator animator;
     public string attackAnimationName = "attack_left_2";
     public string idleAnimationName = "idle";
+    [Header("Bullet Effect")]
+    public GameObject hitEffectPrefab;
+
 
     [SerializeField] private Transform currentTarget;
     [SerializeField] private float lastAttackTime;
     [SerializeField] private bool isAttacking = false;
 
+    private EnemyMove EnemyMove;
+    private EnemyCombat EnemyCombat;
+
+    
     void Start()
     {
-        // Tự động tìm Animator nếu chưa assign
+        EnemyMove = GetComponent<EnemyMove>();
+        EnemyCombat = GetComponent<EnemyCombat>();
         if (animator == null)
         {
             animator = GetComponent<Animator>();
@@ -36,7 +44,12 @@ public class EnemyShooter : MonoBehaviour
 
     void Update()
     {
-        // 1. Tìm mục tiêu
+        if (EnemyCombat != null && EnemyCombat.IsInMeleeCombat)
+        {
+            isAttacking = false;
+            currentTarget = null;
+            return;
+        }
         FindTarget();
 
         // 2. Nếu đang attack animation, không làm gì cả
@@ -45,6 +58,8 @@ public class EnemyShooter : MonoBehaviour
         // 3. Nếu có mục tiêu
         if (currentTarget != null)
         {
+            EnemyMove?.StopMove();
+            
             FaceTarget();
 
             // Chơi animation Idle khi chờ attack
@@ -58,7 +73,8 @@ public class EnemyShooter : MonoBehaviour
         }
         else
         {
-            // Không có mục tiêu, chơi idle
+            // Không có mục tiêu, chơi idle--Resume move
+            EnemyMove?.ResumeMove();
             PlayAnimation(idleAnimationName);
         }
     }
@@ -95,13 +111,13 @@ public class EnemyShooter : MonoBehaviour
         if (currentTarget == null) return;
 
         Vector3 scale = transform.localScale;
-        if (currentTarget.position.x > transform.position.x)
+        if (currentTarget.position.x < transform.position.x)
         {
-            scale.x = Mathf.Abs(scale.x); // Quay phải
+            scale.x = Mathf.Abs(scale.x);
         }
         else
         {
-            scale.x = -Mathf.Abs(scale.x); // Quay trái
+            scale.x = -Mathf.Abs(scale.x); 
         }
 
         transform.localScale = scale;
@@ -110,77 +126,50 @@ public class EnemyShooter : MonoBehaviour
     void StartAttack()
     {
         Debug.Log("StartAttack");
-        // Đánh dấu đang tấn công
+       
         isAttacking = true;
 
-        // Chơi animation attack
+    
         PlayAnimation(attackAnimationName);
 
-        // Reset thời gian tấn công
+      
         lastAttackTime = Time.time;
 
-        // Không cần gọi Shoot() ở đây, sẽ gọi qua Animation Event
+     
     }
 
-    // Hàm này sẽ được gọi từ Animation Event
+  
     public void FireBullet()
     {
         if (currentTarget == null || bulletPrefab == null || firePoint == null)
-        {
-            Debug.LogWarning("Cannot fire: Missing components!");
             return;
-        }
 
-        Vector2 targetCenter = GetMarkerCenter(currentTarget);
+        GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
 
-        Vector2 direction = (targetCenter - (Vector2)firePoint.position).normalized;
-        
-
-        // 1. Tính hướng bắn
-    
-
-        // 2. Tạo đạn
-        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
-
-        // 3. Thiết lập đạn
-        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
-        if (rb != null)
+        EnemyBullet bullet = bulletObj.GetComponent<EnemyBullet>();
+        if (bullet != null)
         {
-            rb.velocity = direction * bulletSpeed;
+            bullet.Init(currentTarget, damage, bulletSpeed);
+            bullet.SetHitEffect(hitEffectPrefab);
         }
-
-        // 4. Thiết lập sát thương
-        EnemyBullet bulletScript = bullet.GetComponent<EnemyBullet>();
-        if (bulletScript != null)
-        {
-            bulletScript.SetDamage(damage);
-        }
-
-        // 5. Tự hủy đạn sau 3 giây
-        Destroy(bullet, 3f);
     }
-    Vector2 GetMarkerCenter(Transform target)
-    {
-        Transform centerMarker = target.Find("CenterMarker");
-        if (centerMarker != null)
-        {
-            return centerMarker.position;
-        }
-        return target.position;
-    }
+  
 
-    // Hàm này sẽ được gọi từ Animation Event khi animation kết thúc
+
     public void OnAttackAnimationEnd()
     {
         isAttacking = false;
-        Debug.Log("Attack animation finished");
+        if (currentTarget == null)
+        {
+            EnemyMove?.ResumeMove();
+        }
     }
 
     void PlayAnimation(string animationName)
     {
         if (animator != null && !string.IsNullOrEmpty(animationName))
         {
-            Debug.Log($"PlayAnimation {animationName}");
+      
             animator.Play(animationName);
         }
     }

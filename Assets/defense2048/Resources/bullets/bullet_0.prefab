@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 212000975555193339}
   - component: {fileID: 50253035059622809}
   - component: {fileID: 58378078108137595}
+  - component: {fileID: 5986191594997247176}
   m_Layer: 11
   m_Name: bullet_0
   m_TagString: Untagged
@@ -72,8 +73,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -138643691
-  m_SortingLayer: 0
+  m_SortingLayerID: -736592855
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: d7fb8b59e87a20a4bb0f429139c83954, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -148,3 +149,18 @@ CircleCollider2D:
   m_Offset: {x: 0.1, y: 0}
   serializedVersion: 2
   m_Radius: 0.06
+--- !u!114 &5986191594997247176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1880168843581737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0df2cc1aa9fd3439a958b0e68b861c69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damage: 1
+  flightTime: 0.6
+  arcHeight: 2

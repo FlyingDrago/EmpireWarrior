@@ -10,6 +10,7 @@ public class EnemyHeath : MonoBehaviour
     private EnemyCombat Combat;
 
     private EnemyMove EnemyMove;
+    public event Action<int, int> EnemyOnHealthChanged; 
 
     private void Awake()
     {
@@ -20,10 +21,15 @@ public class EnemyHeath : MonoBehaviour
     void OnEnable()
     {
         _currentHp = maxHp;
+        EnemyOnHealthChanged?.Invoke(_currentHp,maxHp);
     }
     public void TakeDamage(int damage)
     {
         _currentHp -= damage;
+        _currentHp = Mathf.Clamp(_currentHp, 0, maxHp);
+
+   
+        EnemyOnHealthChanged?.Invoke(_currentHp, maxHp);
         if (_currentHp <= 0)
         {
             Die();
@@ -45,5 +51,6 @@ public class EnemyHeath : MonoBehaviour
     {
         maxHp = data.maxHp;
         _currentHp = maxHp;
+        EnemyOnHealthChanged?.Invoke(_currentHp,maxHp);
     }
 }

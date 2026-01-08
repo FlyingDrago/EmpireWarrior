@@ -9,8 +9,10 @@ public abstract class DefenseHealth : MonoBehaviour
     protected int currentHp;
     public bool IsBusy { get; private set; }
     private EnemyCombat lockedEnemy;
+    public event Action<int, int> OnHealthChanged; 
+        
 
-    protected void Awake()
+    protected virtual void Awake()
     {
         currentHp = maxHp;
     }
@@ -18,6 +20,9 @@ public abstract class DefenseHealth : MonoBehaviour
     public virtual void TakeDamage(int damage)
     {
         currentHp -= damage;
+        currentHp = Mathf.Clamp(currentHp, 0, maxHp);
+        
+        OnHealthChanged?.Invoke(currentHp,maxHp);
 
         if (currentHp <= 0)
         {
