@@ -10,7 +10,8 @@ public class EnemyHeath : MonoBehaviour
     private EnemyCombat Combat;
 
     private EnemyMove EnemyMove;
-    public event Action<int, int> EnemyOnHealthChanged; 
+    public event Action<int, int> EnemyOnHealthChanged;
+    public event Action OnEnemyDead; 
 
     private void Awake()
     {
@@ -43,6 +44,7 @@ public class EnemyHeath : MonoBehaviour
            
             Combat.OnDead();
         }
+        OnEnemyDead?.Invoke();
         EnemyPool.Instance.ReturnEnemy(gameObject);
     }
     

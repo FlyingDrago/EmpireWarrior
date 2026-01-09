@@ -65,27 +65,33 @@ public class SoldierMove : MonoBehaviour
         {
             isMoving = false;
             soldierAnim.PlayIdle();
-            enemy.GetComponent<EnemyCombat>().OnSoldierArrived(transform);
+
+            var enemyCombat = enemy.GetComponent<EnemyCombat>();
+            enemyCombat.OnSoldierArrived(transform);
+
+            GetComponent<SoldierCombat>().SetInPosition(true);
         }
+
     }
 
     public void MoveToEnemy(Transform enemyTf)
     {
-        if (hasTarget) return;
-
         enemy = enemyTf;
         hasTarget = true;
         isMoving = true;
-        
-        soldierAnim.PlayMove();
+        returningToFormation = false;
+
+        if (soldierAnim != null)
+            soldierAnim.PlayMove();
     }
+
 
     public void ClearTarget()
     {
         enemy = null;
         hasTarget = false;
         isMoving = false;
-       ReturnFormation();
+    
     }
     public static void FaceTarget(Transform self, Transform target)
     {
@@ -136,4 +142,20 @@ public class SoldierMove : MonoBehaviour
         
 
     }
+    void OnEnable()
+    {
+        ResetState();
+    }
+
+    public void ResetState()
+    {
+        enemy = null;
+        hasTarget = false;
+        isMoving = false;
+        returningToFormation = false;
+
+        if (soldierAnim != null)
+            soldierAnim.PlayIdle();
+    }
+
 }

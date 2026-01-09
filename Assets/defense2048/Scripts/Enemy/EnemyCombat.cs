@@ -68,32 +68,31 @@ public class EnemyCombat : MonoBehaviour
     public void OnDead()
     {
         if (target != null)
-        {
             target.Unlock();
-            
-        }
-        RestoreMoveDirection();
+
         if (soldier != null)
         {
-            SoldierCombat sc = soldier.GetComponent<SoldierCombat>();
+            var sc = soldier.GetComponent<SoldierCombat>();
             if (sc != null)
-            {
                 sc.StopCombat();
-            }
-            
-            SoldierMove sm = soldier.GetComponent<SoldierMove>();
+
+            var sm = soldier.GetComponent<SoldierMove>();
             if (sm != null)
                 sm.ClearTarget();
         }
-      
 
         soldier = null;
         target = null;
         IsLocked = false;
         state = CombatState.Walking;
+        EnemyShooter shooter = GetComponent<EnemyShooter>();
+        if (shooter != null)
+            shooter.enabled = true;
+
 
         enemyMove.ResumeMove();
     }
+
 
     void DetectDefense()
     {
@@ -118,14 +117,17 @@ public class EnemyCombat : MonoBehaviour
         soldier = soldierTf;
         state = CombatState.Attacking;
 
-        SoldierCombat sc = soldier.GetComponent<SoldierCombat>();
-       
+        // TẮT SHOOTER
+        EnemyShooter shooter = GetComponent<EnemyShooter>();
+        if (shooter != null)
+            shooter.enabled = false;
+
+        var sc = soldier.GetComponent<SoldierCombat>();
         if (sc != null)
-        {
-            
             sc.StartCombat(this);
-        }
     }
+
+
 
     void RestoreMoveDirection()
     {
@@ -178,6 +180,10 @@ public class EnemyCombat : MonoBehaviour
         target = null;
 
         state = CombatState.Walking;
+        EnemyShooter shooter = GetComponent<EnemyShooter>();
+        if (shooter != null)
+            shooter.enabled = true;
+
         enemyMove.ResumeMove();
     }
     public static void FaceTarget(Transform self, Transform target)

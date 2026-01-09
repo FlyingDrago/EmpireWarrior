@@ -14,10 +14,10 @@ public class SoldierAnimation : MonoBehaviour
 
     public void PlayIdle()
     {
-        anim.ResetTrigger("move");
-        anim.ResetTrigger("attack");
-        anim.SetTrigger("idle");
+        if (anim == null || !anim.isActiveAndEnabled) return;
+        anim.Play("idle");
     }
+
 
     public void PlayMove()
     {

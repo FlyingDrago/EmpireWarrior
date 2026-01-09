@@ -44,15 +44,23 @@ public class TowerFormation : MonoBehaviour
 
         SoldierMove move = soldierObj.GetComponent<SoldierMove>();
         SoldierHealth health = soldierObj.GetComponent<SoldierHealth>();
+        SoldierCombat combat = soldierObj.GetComponent<SoldierCombat>();
+        
+        
 
         move.SetFormaiton(formationAnchor, offset);
-        move.ReturnFormation();
+     
 
         health.ownerTower = this;
         health.formationOffset = offset;
+        
+        if (!combat.TryFindEnemyImmediate())
+        {
+            move.ReturnFormation();
+        }
     }
 
-    // 🔥 ĐƯỢC GỌI KHI SOLDIER CHẾT
+    //  ĐƯỢC GỌI KHI SOLDIER CHẾT
     public void OnSoldierDead(SoldierHealth deadSoldier)
     {
         StartCoroutine(RespawnSoldier(deadSoldier.formationOffset));

@@ -48,8 +48,11 @@ public class EnemyShooter : MonoBehaviour
         {
             isAttacking = false;
             currentTarget = null;
+            EnemyMove?.StopMove();
+            PlayAnimation(idleAnimationName);
             return;
         }
+
         FindTarget();
 
         // 2. Nếu đang attack animation, không làm gì cả
@@ -159,11 +162,16 @@ public class EnemyShooter : MonoBehaviour
     public void OnAttackAnimationEnd()
     {
         isAttacking = false;
-        if (currentTarget == null)
+
+        // nếu không bị soldier lock thì quay về đi bộ
+        if (EnemyCombat == null || !EnemyCombat.IsInMeleeCombat)
         {
+            currentTarget = null;
             EnemyMove?.ResumeMove();
+            PlayAnimation("move");   // animation chạy bộ
         }
     }
+
 
     void PlayAnimation(string animationName)
     {
@@ -173,6 +181,14 @@ public class EnemyShooter : MonoBehaviour
             animator.Play(animationName);
         }
     }
+    public void OnSoldierDead()
+    {
+        isAttacking = false;
+        currentTarget = null;
+        EnemyMove?.ResumeMove();
+        PlayAnimation(idleAnimationName);
+    }
+
 
     void OnDrawGizmosSelected()
     {
