@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 61182181973779140}
   - component: {fileID: 210421280015642585}
   - component: {fileID: 3255486110335721115}
+  - component: {fileID: 5310723907563602274}
   m_Layer: 9
   m_Name: tower_1_0_0
   m_TagString: tower
@@ -32,8 +33,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 8443338520056854558}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
 --- !u!212 &212230668038807136
@@ -158,36 +158,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soldierPrefab: {fileID: 1981079241515676, guid: 841d0b88e1b3aa948994308f88d4a8e4, type: 3}
-  formationAnchor: {fileID: 8443338520056854558}
-  formationRadius: 0.6
---- !u!1 &6805038601659268368
-GameObject:
+  respawnDelay: 3
+  formationRadius: 0.4
+  detectRadius: 1.5
+  towerPointTag: tower_point
+  soldierSpawnPoint: {fileID: 0}
+--- !u!114 &5310723907563602274
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8443338520056854558}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8443338520056854558
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6805038601659268368}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.93, y: 0.73, z: 0.09626023}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4614111720522632}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_GameObject: {fileID: 1669854147447653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a670e3a024de54e898a65f8deb207d79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  level: 1
+  ownerPoint: {fileID: 0}

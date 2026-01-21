@@ -45,6 +45,7 @@ public class EnemyHeath : MonoBehaviour
             Combat.OnDead();
         }
         OnEnemyDead?.Invoke();
+        OnEnemyDead = null;
         EnemyPool.Instance.ReturnEnemy(gameObject);
     }
     

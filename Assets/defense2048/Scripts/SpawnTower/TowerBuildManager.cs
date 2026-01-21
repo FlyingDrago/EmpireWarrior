@@ -20,12 +20,13 @@ public class TowerBuildManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
         buildPanel.gameObject.SetActive(false);
     }
 
     public void OpenBuildPanel(TowerPoint point)
     {
-        if(!buildPanel||!clickBlocker)return;
+        if (!buildPanel || !clickBlocker) return;
 
         currentPoint = point;
 
@@ -41,6 +42,7 @@ public class TowerBuildManager : MonoBehaviour
         buildPanel.gameObject.SetActive(true);
         ResetConfirm();
     }
+
     public void OnBuildButtonClicked(BuildTowerButton button)
     {
         // LẦN 2 → BUILD
@@ -56,6 +58,7 @@ public class TowerBuildManager : MonoBehaviour
         currentConfirmButton = button;
         button.SetConfirm(true);
     }
+
     void ResetConfirm()
     {
         if (currentConfirmButton != null)
@@ -64,25 +67,30 @@ public class TowerBuildManager : MonoBehaviour
             currentConfirmButton = null;
         }
     }
-
-
-
     public void BuildTower(GameObject towerPrefab)
     {
-        if(currentPoint==null|| towerPrefab==null)
+        if (currentPoint == null || towerPrefab == null)
             return;
 
-        Instantiate(towerPrefab, currentPoint.transform.position, Quaternion.identity);
-        
+      GameObject towerGO=  Instantiate(towerPrefab, currentPoint.transform.position, Quaternion.identity);
+
+      Tower tower = towerGO.GetComponentInParent<Tower>();
+      if (tower != null)
+      {
+          tower.ownerPoint = currentPoint;
+      }
+      
         currentPoint.SetOccupied(true);
         CloseBuildPanel();
     }
 
     public void CloseBuildPanel()
     {
-        currentPoint = null;
+        currentPoint = null; 
         buildPanel.gameObject.SetActive(false);
         clickBlocker.SetActive(false);
         ResetConfirm();
-    }
+    }        
 }
+
+         

@@ -226,7 +226,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4855133466076214}
   - component: {fileID: 58178381133006053}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: detect range
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -363,8 +363,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -257466439
-  m_SortingLayer: 2
+  m_SortingLayerID: 2063777945
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 73717c3c0aa8e224bafa1e0db23f1388, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -495,6 +495,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHp: 10
+  ownerTower: {fileID: 0}
+  formationOffset: {x: 0, y: 0, z: 0}
 --- !u!114 &8329125961075813082
 MonoBehaviour:
   m_ObjectHideFlags: 0

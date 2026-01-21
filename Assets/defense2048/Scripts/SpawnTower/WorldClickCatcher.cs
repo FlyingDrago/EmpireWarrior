@@ -1,3 +1,4 @@
+using defense2048.Scripts.SpawnTower;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -19,6 +20,7 @@ public class WorldClickCatcher : MonoBehaviour
             if (!hit || !hit.collider.CompareTag("tower_point"))
             {
                 TowerBuildManager.instance?.CloseBuildPanel();
+                TowerUIManager.instance?.Close();
             }
         }
     }

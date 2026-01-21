@@ -238,6 +238,7 @@ GameObject:
   - component: {fileID: 95740504959357793}
   - component: {fileID: 61044120391689787}
   - component: {fileID: 210447655383145405}
+  - component: {fileID: 1644023215325412817}
   m_Layer: 9
   m_Name: tower_2_0_0
   m_TagString: tower
@@ -392,6 +393,20 @@ SortingGroup:
   m_SortingLayer: 2
   m_SortingOrder: 0
   m_SortAtRoot: 0
+--- !u!114 &1644023215325412817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1960258503553964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a670e3a024de54e898a65f8deb207d79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  level: 1
+  ownerPoint: {fileID: 0}
 --- !u!1 &1987724795943621
 GameObject:
   m_ObjectHideFlags: 0
