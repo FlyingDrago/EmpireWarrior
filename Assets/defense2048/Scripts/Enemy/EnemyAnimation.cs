@@ -9,6 +9,7 @@ public class EnemyAnimation : MonoBehaviour
     private string currentTrigger;
     private bool isAttacking;
 
+    private EnemyShooter EnemyShooter;
     void Awake()
     {
         animator = GetComponent<Animator>();
@@ -69,6 +70,7 @@ public class EnemyAnimation : MonoBehaviour
     public void OnAttackEnd()
     {
         isAttacking = false;
+      
     }
 
     public void PlayIdle()

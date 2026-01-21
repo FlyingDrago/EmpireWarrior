@@ -439,23 +439,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18e29faab8d604a7ca8188cc53519524, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _collider2Ds: []
   attackRange: 1.5
-  attackCooldown: 1.5
+  attackCooldown: 2
   damage: 1
-  bulletPrefab: {fileID: 1642677494313038, guid: b22dc27657d310b4b948e268852e6aaf, type: 3}
-  firePoint: {fileID: 5583672441347008968}
-  bulletSpeed: 8
   targetLayer:
     serializedVersion: 2
     m_Bits: 64
-  animator: {fileID: 0}
-  attackAnimationName: attack_left_2
-  idleAnimationName: idle
+  bulletPrefab: {fileID: 1642677494313038, guid: b22dc27657d310b4b948e268852e6aaf, type: 3}
+  firePoint: {fileID: 5583672441347008968}
+  bulletSpeed: 8
   hitEffectPrefab: {fileID: 1088625214339013, guid: 9a750e7e370878f4e8a1bab682feeb59, type: 3}
   currentTarget: {fileID: 0}
-  lastAttackTime: 0
-  isAttacking: 0
 --- !u!114 &2347473100267140709
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -4,20 +4,68 @@ using UnityEngine;
 
 public class TowerFormation : MonoBehaviour
 {
-    public GameObject soldierPrefab;
-    public Transform formationAnchor;
-    public float formationRadius = 0.6f;
-    public float respawnDelay = 3f;
+    [Header("Soldier")]
+    [SerializeField] private GameObject soldierPrefab;
+    [SerializeField] private float respawnDelay = 3f;
 
+    [Header("Formation")]
+    [SerializeField] private float formationRadius = 0.6f;
+
+    [Header("Tower Point Detect")]
+    [SerializeField] private float detectRadius = 1.5f;
+    [SerializeField] private string towerPointTag = "tower_point";
+    [SerializeField] private Transform soldierSpawnPoint;
+
+
+    private Transform formationAnchor;
     private readonly List<Vector3> formationOffsets = new();
 
     private void Start()
     {
-        CreateTriangleOffsets();
+        FindFormationAnchor();
+        CreateFormationOffsets();
         SpawnInitialSoldiers();
     }
 
-    void CreateTriangleOffsets()
+    #region Find Anchor
+
+    void FindFormationAnchor()
+    {
+        GameObject[] points = GameObject.FindGameObjectsWithTag(towerPointTag);
+
+        float minDist = Mathf.Infinity;
+        Transform nearest = null;
+
+        foreach (var point in points)
+        {
+            float d = Vector2.Distance(transform.position, point.transform.position);
+            if (d < minDist && d <= detectRadius)
+            {
+                minDist = d;
+                nearest = point.transform;
+            }
+        }
+
+        if (nearest == null)
+        {
+            Debug.LogError("❌ No TowerPoint found near tower!");
+            return;
+        }
+
+        if (nearest.childCount == 0)
+        {
+            Debug.LogError("❌ TowerPoint has no anchor child!");
+            return;
+        }
+
+        formationAnchor = nearest.GetChild(0);
+    }
+
+    #endregion
+
+    #region Formation
+
+    void CreateFormationOffsets()
     {
         formationOffsets.Clear();
 
@@ -28,39 +76,37 @@ public class TowerFormation : MonoBehaviour
 
     void SpawnInitialSoldiers()
     {
+        if (formationAnchor == null) return;
+
         foreach (var offset in formationOffsets)
-        {
             SpawnSoldier(offset);
-        }
     }
+
+    #endregion
+
+    #region Spawn
 
     void SpawnSoldier(Vector3 offset)
     {
+        Vector3 spawnPos = soldierSpawnPoint != null
+            ? soldierSpawnPoint.position
+            : transform.position;
+
         GameObject soldierObj = Instantiate(
             soldierPrefab,
-            transform.position,
+            spawnPos,
             Quaternion.identity
         );
 
         SoldierMove move = soldierObj.GetComponent<SoldierMove>();
         SoldierHealth health = soldierObj.GetComponent<SoldierHealth>();
-        SoldierCombat combat = soldierObj.GetComponent<SoldierCombat>();
-        
-        
 
         move.SetFormaiton(formationAnchor, offset);
-     
 
         health.ownerTower = this;
         health.formationOffset = offset;
-        
-        if (!combat.TryFindEnemyImmediate())
-        {
-            move.ReturnFormation();
-        }
     }
 
-    //  ĐƯỢC GỌI KHI SOLDIER CHẾT
     public void OnSoldierDead(SoldierHealth deadSoldier)
     {
         StartCoroutine(RespawnSoldier(deadSoldier.formationOffset));
@@ -71,4 +117,6 @@ public class TowerFormation : MonoBehaviour
         yield return new WaitForSeconds(respawnDelay);
         SpawnSoldier(offset);
     }
+
+    #endregion
 }

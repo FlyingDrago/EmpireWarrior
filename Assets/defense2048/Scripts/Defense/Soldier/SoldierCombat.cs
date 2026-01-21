@@ -87,29 +87,40 @@ public class SoldierCombat : MonoBehaviour
 
     public void AnimDealDamage()
     {
-        if (enemy != null)
-        {
-            enemy.GetComponent<EnemyHeath>()?.TakeDamage(damage);
-        }
+        if (enemy == null) return;
+
+        EnemyHeath eh = enemy.GetComponent<EnemyHeath>();
+        if (eh == null || !eh.gameObject.activeInHierarchy) return;
+
+        eh.TakeDamage(damage);
     }
+
 
     public void StopCombat()
     {
+        if (enemy != null)
+        {
+            EnemyHeath eh = enemy.GetComponent<EnemyHeath>();
+            if (eh != null)
+                eh.OnEnemyDead -= StopCombat; // 🔥 BẮT BUỘC
+        }
+      
+            enemy.OnSoldierDead();
+        
+
+
         enemy = null;
         isInPosition = false;
         lastAttackTime = 0;
+        
+        if(this!=null&& gameObject.activeInHierarchy)SoldierAnimation?.PlayIdle();
 
-        if (!this || !gameObject.activeInHierarchy) return;
 
-        if (SoldierAnimation != null)
-            SoldierAnimation.PlayIdle();
-
-        var move = GetComponent<SoldierMove>();
-        if (move != null)
-            move.ClearTarget();
-
-        TryFindEnemy();
+        SoldierMove move = GetComponent<SoldierMove>();
+        if(move!=null)
+            move.ReturnFormation();
     }
+
 
     public void SetInPosition(bool v)
     {
@@ -125,5 +136,19 @@ public class SoldierCombat : MonoBehaviour
 
         Invoke(nameof(TryFindEnemyImmediate), 0.05f);
     }
+    void OnDisable()
+    {
+        if (enemy != null)
+        {
+            EnemyHeath eh = enemy.GetComponent<EnemyHeath>();
+            if (eh != null)
+                eh.OnEnemyDead -= StopCombat;
+        }
+
+        enemy = null;
+    }
+
+    
+    
 
 }

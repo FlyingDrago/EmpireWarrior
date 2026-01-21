@@ -1,161 +1,158 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿using UnityEngine;
 
 public class SoldierMove : MonoBehaviour
 {
     public float speed = 3f;
-    public float combatOffset = 0.6f; 
+    public float combatOffset = 0.6f;
 
     private Transform enemy;
-    private bool isMoving;
-    private bool hasTarget;
-
-    private SoldierAnimation soldierAnim;
-
-    private Transform tower;
+    private Transform formationAnchor;
     private Vector3 formationOffset;
-    private bool returningToFormation;
+
+    private SoldierAnimation anim;
+
+    private SoldierState state;
+
+    enum SoldierState
+    {
+        ToFormation,
+        InFormation,
+        ToEnemy
+    }
 
     private void Awake()
     {
-        soldierAnim = GetComponent<SoldierAnimation>();
+        anim = GetComponent<SoldierAnimation>();
     }
 
-    void Update()
+    private void OnEnable()
     {
-        if (returningToFormation)
-        {
-            ReturnToFormation();
-            return;
-        }
-        
-        
-        
-        if(!isMoving)return;
-        FaceTarget(transform, enemy);
-        if (enemy == null)
-        {
-            ClearTarget();
-            return;
-        }
-
-        // TÍNH VỊ TRÍ ĐỨNG NGANG
-        Vector3 targetPos = enemy.position;
-
-        // đứng lệch sang trái hoặc phải enemy
-        if (transform.position.x < enemy.position.x)
-            targetPos.x = enemy.position.x - combatOffset;
-        else
-            targetPos.x = enemy.position.x + combatOffset;
-
-        // cùng hàng Y 
-        targetPos.y = enemy.position.y;
-
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            targetPos,
-            speed * Time.deltaTime
-        );
-
-        // tới đúng vị trí chiến đấu
-        if (Vector3.Distance(transform.position, targetPos) < 0.05f)
-        {
-            isMoving = false;
-            soldierAnim.PlayIdle();
-
-            var enemyCombat = enemy.GetComponent<EnemyCombat>();
-            enemyCombat.OnSoldierArrived(transform);
-
-            GetComponent<SoldierCombat>().SetInPosition(true);
-        }
-
+        state = SoldierState.ToFormation;
+        anim?.PlayMove();
     }
+
+    private void Update()
+    {
+        switch (state)
+        {
+            case SoldierState.ToFormation:
+                UpdateMoveToFormation();
+                break;
+
+            case SoldierState.ToEnemy:
+                UpdateMoveToEnemy();
+                break;
+        }
+    }
+
+    // ================= FORMATION =================
+
+    public void SetFormaiton(Transform anchor, Vector3 offset)
+    {
+        formationAnchor = anchor;
+        formationOffset = offset;
+    }
+
+    void UpdateMoveToFormation()
+    {
+        if (formationAnchor == null) return;
+
+        Vector3 targetPos = formationAnchor.position + formationOffset;
+
+        FaceMoveDirection(targetPos); // 🔥 FLIP THEO HƯỚNG DI CHUYỂN
+        Move(targetPos);
+
+        if (Reached(targetPos))
+        {
+            state = SoldierState.InFormation;
+            anim?.PlayIdle();
+        }
+    }
+
+    public void ReturnFormation()
+    {
+        enemy = null;
+        state = SoldierState.ToFormation;
+        anim?.PlayMove();
+    }
+
+    // ================= COMBAT =================
 
     public void MoveToEnemy(Transform enemyTf)
     {
         enemy = enemyTf;
-        hasTarget = true;
-        isMoving = true;
-        returningToFormation = false;
-
-        if (soldierAnim != null)
-            soldierAnim.PlayMove();
+        state = SoldierState.ToEnemy;
+        anim?.PlayMove();
     }
 
-
-    public void ClearTarget()
+    void UpdateMoveToEnemy()
     {
-        enemy = null;
-        hasTarget = false;
-        isMoving = false;
-    
+        if (enemy == null)
+        {
+            ReturnFormation();
+            return;
+        }
+
+        Vector3 targetPos = enemy.position;
+        targetPos.x += transform.position.x < enemy.position.x
+            ? -combatOffset
+            : combatOffset;
+
+        FaceMoveDirection(targetPos); // 🔥
+        Move(targetPos);
+
+        if (Reached(targetPos))
+        {
+            anim?.PlayIdle();
+            state = SoldierState.InFormation;
+
+            enemy.GetComponent<EnemyCombat>()
+                ?.OnSoldierArrived(transform);
+
+            GetComponent<SoldierCombat>()
+                ?.SetInPosition(true);
+        }
     }
+
+    // ================= UTILS =================
+
+    void Move(Vector3 target)
+    {
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            target,
+            speed * Time.deltaTime
+        );
+    }
+
+    bool Reached(Vector3 target)
+    {
+        return Vector3.Distance(transform.position, target) < 0.05f;
+    }
+
     public static void FaceTarget(Transform self, Transform target)
     {
         if (!self || !target) return;
 
         Vector3 scale = self.localScale;
-
-        if (self.position.x > target.position.x)
-            scale.x = Mathf.Abs(scale.x);   // quay sang phải
-        else
-            scale.x = -Mathf.Abs(scale.x);  // quay sang trái
+        scale.x = self.position.x > target.position.x
+            ? Mathf.Abs(scale.x)
+            : -Mathf.Abs(scale.x);
 
         self.localScale = scale;
     }
-
-    public void SetFormaiton(Transform anchor, Vector3 offset)
+    void FaceMoveDirection(Vector3 target)
     {
-        tower = anchor;
-        formationOffset = offset;
-        
-    }
+        float dx = target.x - transform.position.x;
 
-    public void ReturnFormation()
-    {
-        if(tower==null)return;
+        if (Mathf.Abs(dx) < 0.01f) return;
 
-        enemy = null;
-        hasTarget = false;
-        isMoving = false;
-        returningToFormation = true;
-        
-        soldierAnim.PlayMove();
-  
+        Vector3 scale = transform.localScale;
+        scale.x = dx > 0
+            ? -Mathf.Abs(scale.x)   // đi sang phải → quay phải
+            : Mathf.Abs(scale.x);   // đi sang trái → quay trái
 
-    }
-
-    public void ReturnToFormation()
-    {
-        Vector3 targetPos = tower.position + formationOffset;
-
-        transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
-
-        if (Vector3.Distance(transform.position, targetPos) < 0.05f)
-        {
-            returningToFormation = false;
-            soldierAnim.PlayIdle();
-        }
-        
-
-    }
-    void OnEnable()
-    {
-        ResetState();
-    }
-
-    public void ResetState()
-    {
-        enemy = null;
-        hasTarget = false;
-        isMoving = false;
-        returningToFormation = false;
-
-        if (soldierAnim != null)
-            soldierAnim.PlayIdle();
+        transform.localScale = scale;
     }
 
 }

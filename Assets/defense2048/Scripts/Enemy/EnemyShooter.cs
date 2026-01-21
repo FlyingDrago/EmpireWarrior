@@ -1,192 +1,178 @@
 using UnityEngine;
+using System.Collections;
 
 public class EnemyShooter : MonoBehaviour
 {
-    [SerializeField] private Collider2D[] _collider2Ds;
-    [Header("Attack Settings")]
-    public float attackRange = 5f;
+    [Header("Ranged Settings")] public float attackRange = 5f;
     public float attackCooldown = 2f;
     public int damage = 1;
-
-    [Header("Bullet Settings")] 
-    public GameObject bulletPrefab;
-    public Transform firePoint;
-    public float bulletSpeed = 8f;
-
-    [Header("Target Settings")] 
     public LayerMask targetLayer;
 
-    [Header("Animation")] 
-    public Animator animator;
-    public string attackAnimationName = "attack_left_2";
-    public string idleAnimationName = "idle";
-    [Header("Bullet Effect")]
+    [Header("Bullet")] public GameObject bulletPrefab;
+    public Transform firePoint;
+    public float bulletSpeed = 8f;
     public GameObject hitEffectPrefab;
 
-
     [SerializeField] private Transform currentTarget;
-    [SerializeField] private float lastAttackTime;
-    [SerializeField] private bool isAttacking = false;
+    private float lastAttackTime;
+    private bool isAttacking;
 
-    private EnemyMove EnemyMove;
-    private EnemyCombat EnemyCombat;
+    private EnemyMove enemyMove;
+    private EnemyCombat enemyCombat;
+    private EnemyAnimation enemyAnimation;
+    private int currentTargetID = -1;
 
-    
+
+    public bool IsAttacking => isAttacking;
+
     void Start()
     {
-        EnemyMove = GetComponent<EnemyMove>();
-        EnemyCombat = GetComponent<EnemyCombat>();
-        if (animator == null)
-        {
-            animator = GetComponent<Animator>();
-        }
+        enemyMove = GetComponent<EnemyMove>();
+        enemyCombat = GetComponent<EnemyCombat>();
+        enemyAnimation = GetComponent<EnemyAnimation>();
     }
 
     void Update()
     {
-        if (EnemyCombat != null && EnemyCombat.IsInMeleeCombat)
+    
+        if (enemyCombat != null && enemyCombat.IsInMeleeCombat)
+            return;
+        if (isAttacking) return;
+        FindTarget();
+
+        if (currentTarget == null)
         {
-            isAttacking = false;
-            currentTarget = null;
-            EnemyMove?.StopMove();
-            PlayAnimation(idleAnimationName);
+            enemyMove?.ResumeMove();
             return;
         }
 
-        FindTarget();
+      
 
-        // 2. Nếu đang attack animation, không làm gì cả
-        if (isAttacking) return;
+        enemyMove?.StopMove();
+        FaceTarget();
 
-        // 3. Nếu có mục tiêu
-        if (currentTarget != null)
+        if (!isAttacking && Time.time - lastAttackTime >= attackCooldown && currentTarget != null)
         {
-            EnemyMove?.StopMove();
-            
-            FaceTarget();
-
-            // Chơi animation Idle khi chờ attack
-            PlayAnimation(idleAnimationName);
-
-            // Kiểm tra cooldown để tấn công
-            if (Time.time - lastAttackTime >= attackCooldown)
-            {
-                StartAttack();
-            }
-        }
-        else
-        {
-            // Không có mục tiêu, chơi idle--Resume move
-            EnemyMove?.ResumeMove();
-            PlayAnimation(idleAnimationName);
+            StartRangedAttack();
         }
     }
+
+    void StartRangedAttack()
+    {
+        isAttacking = true;
+        lastAttackTime = Time.time;
+
+        enemyAnimation.PlayAttack2();
+    }
+
 
     void FindTarget()
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, attackRange, targetLayer);
-        _collider2Ds = hits;
+        Collider2D[] hits = Physics2D.OverlapCircleAll(
+            transform.position,
+            attackRange,
+            targetLayer
+        );
 
-        if (hits.Length == 0)
+        float closest = Mathf.Infinity;
+        Transform target = null;
+
+        foreach (var hit in hits)
         {
-            currentTarget = null;
-            return;
-        }
+            if (!hit) continue;
+            if (!hit.gameObject.activeInHierarchy) continue;
 
-        float closestDistance = Mathf.Infinity;
-        Transform closestTarget = null;
+            SoldierHealth health = hit.GetComponent<SoldierHealth>();
+            if (health == null) continue;
 
-        foreach (Collider2D hit in hits)
-        {
-            float distance = Vector2.Distance(transform.position, hit.transform.position);
-            if (distance < closestDistance)
+            float d = Vector2.Distance(transform.position, hit.transform.position);
+            if (d < closest)
             {
-                closestDistance = distance;
-                closestTarget = hit.transform;
+                closest = d;
+                target = hit.transform;
             }
         }
 
-        currentTarget = closestTarget;
+        
+        if (target != null)
+        {
+            currentTarget = target;
+            currentTargetID = target.GetInstanceID();
+        }
+        else
+        {
+            currentTarget = null;
+            currentTargetID = -1;
+        }
     }
+
 
     void FaceTarget()
     {
         if (currentTarget == null) return;
 
         Vector3 scale = transform.localScale;
-        if (currentTarget.position.x < transform.position.x)
-        {
-            scale.x = Mathf.Abs(scale.x);
-        }
-        else
-        {
-            scale.x = -Mathf.Abs(scale.x); 
-        }
-
+        scale.x = currentTarget.position.x < transform.position.x
+            ? Mathf.Abs(scale.x)
+            : -Mathf.Abs(scale.x);
         transform.localScale = scale;
     }
 
-    void StartAttack()
-    {
-        Debug.Log("StartAttack");
-       
-        isAttacking = true;
 
-    
-        PlayAnimation(attackAnimationName);
-
-      
-        lastAttackTime = Time.time;
-
-     
-    }
-
-  
     public void FireBullet()
     {
-        if (currentTarget == null || bulletPrefab == null || firePoint == null)
-            return;
+        if (currentTarget == null) return;
+        if (!currentTarget.gameObject.activeInHierarchy) return;
 
         GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
 
         EnemyBullet bullet = bulletObj.GetComponent<EnemyBullet>();
         if (bullet != null)
         {
-            bullet.Init(EnemyCombat,currentTarget, damage, bulletSpeed);
+            bullet.Init(enemyCombat, currentTarget, damage, bulletSpeed);
             bullet.SetHitEffect(hitEffectPrefab);
         }
     }
-  
 
 
     public void OnAttackAnimationEnd()
     {
+        Debug.Log("Reset");
         isAttacking = false;
+        if (enemyAnimation != null)
+            enemyAnimation.OnAttackEnd();
+    }
 
-        // nếu không bị soldier lock thì quay về đi bộ
-        if (EnemyCombat == null || !EnemyCombat.IsInMeleeCombat)
+    void OnEnable()
+    {
+        SoldierHealth.OnAnySoldierDead += OnSoldierDead;
+    }
+
+    void OnDisable()
+    {
+        SoldierHealth.OnAnySoldierDead -= OnSoldierDead;
+    }
+
+    void OnSoldierDead(SoldierHealth deadSoldier)
+    {
+        if (currentTarget == null) return;
+
+        if (deadSoldier.GetInstanceID() == currentTargetID)
         {
             currentTarget = null;
-            EnemyMove?.ResumeMove();
-            PlayAnimation("move");   // animation chạy bộ
+            currentTargetID = -1;
+            isAttacking = false;
+            lastAttackTime = 0;
+
+            enemyMove?.ResumeMove();
+            enemyAnimation?.OnAttackEnd();
         }
     }
 
 
-    void PlayAnimation(string animationName)
+    public void SetAttacking(bool value)
     {
-        if (animator != null && !string.IsNullOrEmpty(animationName))
-        {
-      
-            animator.Play(animationName);
-        }
-    }
-    public void OnSoldierDead()
-    {
-        isAttacking = false;
-        currentTarget = null;
-        EnemyMove?.ResumeMove();
-        PlayAnimation(idleAnimationName);
+        isAttacking = value;
     }
 
 

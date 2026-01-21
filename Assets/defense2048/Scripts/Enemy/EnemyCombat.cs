@@ -24,8 +24,6 @@ public class EnemyCombat : MonoBehaviour
     public bool HasTarget => target != null;
     public bool IsLocked { get; private set; }
     public bool IsInMeleeCombat => state == CombatState.Attacking;
-    
-    
 
 
     void Awake()
@@ -39,6 +37,7 @@ public class EnemyCombat : MonoBehaviour
     {
         if (soldier != null)
             FaceTarget(transform, soldier);
+
         switch (state)
         {
             case CombatState.Walking:
@@ -49,22 +48,20 @@ public class EnemyCombat : MonoBehaviour
                 // đứng im, chờ soldier
                 break;
 
-           
 
             case CombatState.Attacking:
                 HandleAttack();
                 break;
         }
+
         if (state != CombatState.Walking && target == null)
         {
-            if (soldier != null)
-                soldier.GetComponent<SoldierMove>()?.ClearTarget();
-
             state = CombatState.Walking;
             IsLocked = false;
-            enemyMove.ResumeMove();
         }
+
     }
+
     public void OnDead()
     {
         if (target != null)
@@ -76,9 +73,7 @@ public class EnemyCombat : MonoBehaviour
             if (sc != null)
                 sc.StopCombat();
 
-            var sm = soldier.GetComponent<SoldierMove>();
-            if (sm != null)
-                sm.ClearTarget();
+         
         }
 
         soldier = null;
@@ -97,7 +92,7 @@ public class EnemyCombat : MonoBehaviour
     void DetectDefense()
     {
         if (IsLocked) return;
-       
+
         target = FindDefense();
 
         if (target != null && !target.IsBusy)
@@ -108,7 +103,6 @@ public class EnemyCombat : MonoBehaviour
             enemyMove.StopMove();
             state = CombatState.Waiting;
             enemyAnim.PlayIdle();
-            
         }
     }
 
@@ -117,16 +111,12 @@ public class EnemyCombat : MonoBehaviour
         soldier = soldierTf;
         state = CombatState.Attacking;
 
-        // TẮT SHOOTER
-        EnemyShooter shooter = GetComponent<EnemyShooter>();
-        if (shooter != null)
-            shooter.enabled = false;
+    
 
         var sc = soldier.GetComponent<SoldierCombat>();
         if (sc != null)
             sc.StartCombat(this);
     }
-
 
 
     void RestoreMoveDirection()
@@ -136,12 +126,10 @@ public class EnemyCombat : MonoBehaviour
         transform.localScale = scale;
     }
 
-      
-    
 
     void HandleAttack()
     {
-        if(soldier!=null)FaceTarget(transform,soldier);
+        if (soldier != null) FaceTarget(transform, soldier);
         if (enemyAnim.IsAttacking) return;
         if (Time.time < lastAttackTime + attackCooldown) return;
 
@@ -151,7 +139,7 @@ public class EnemyCombat : MonoBehaviour
 
     public void DealDamage()
     {
-        if(target!=null)
+        if (target != null)
             target.TakeDamage(damage);
     }
 
@@ -165,7 +153,6 @@ public class EnemyCombat : MonoBehaviour
 
         foreach (var hit in hits)
         {
-           
             DefenseHealth defense = hit.GetComponent<DefenseHealth>();
             if (defense != null)
                 return defense;
@@ -178,14 +165,31 @@ public class EnemyCombat : MonoBehaviour
     {
         IsLocked = false;
         target = null;
+        soldier = null;
 
         state = CombatState.Walking;
+
+        EnemyShooter shooter = GetComponent<EnemyShooter>();
+        if (shooter != null)
+            shooter.enabled = true; // ✔ chỉ enable khi không còn soldier
+
+        enemyMove.ResumeMove();
+    }
+    public void OnSoldierDead()
+    {
+        soldier = null;
+        IsLocked = false;
+        state = CombatState.Walking;
+
         EnemyShooter shooter = GetComponent<EnemyShooter>();
         if (shooter != null)
             shooter.enabled = true;
 
         enemyMove.ResumeMove();
     }
+
+
+
     public static void FaceTarget(Transform self, Transform target)
     {
         if (!self || !target) return;
@@ -193,13 +197,10 @@ public class EnemyCombat : MonoBehaviour
         Vector3 scale = self.localScale;
 
         if (self.position.x > target.position.x)
-            scale.x = Mathf.Abs(scale.x);   // quay sang phải
+            scale.x = Mathf.Abs(scale.x); // quay sang phải
         else
-            scale.x = -Mathf.Abs(scale.x);  // quay sang trái
+            scale.x = -Mathf.Abs(scale.x); // quay sang trái
 
         self.localScale = scale;
     }
-
-
-
 }
