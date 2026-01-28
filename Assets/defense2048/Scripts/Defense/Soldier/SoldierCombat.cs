@@ -40,20 +40,7 @@ public class SoldierCombat : MonoBehaviour
         SoldierAnimation.PlayAttack();
     }
 
-    public void TryFindEnemy()
-    {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, detectRange, enemyLayer);
-
-        foreach (var hit in hits)
-        {
-            EnemyCombat enemyCombat = hit.GetComponent<EnemyCombat>();
-            if (enemyCombat != null && !enemyCombat.IsLocked)
-            {
-                GetComponent<SoldierMove>().MoveToEnemy(enemyCombat.transform);
-                return;
-            }
-        }
-    }
+ 
 
     public bool TryFindEnemyImmediate()
     {
@@ -102,7 +89,7 @@ public class SoldierCombat : MonoBehaviour
         {
             EnemyHeath eh = enemy.GetComponent<EnemyHeath>();
             if (eh != null)
-                eh.OnEnemyDead -= StopCombat; // 🔥 BẮT BUỘC
+                eh.OnEnemyDead -= StopCombat; 
         }
       
             enemy.OnSoldierDead();
