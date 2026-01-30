@@ -34,9 +34,12 @@ public class EnemyShooter : MonoBehaviour
 
     void Update()
     {
-    
-        if (enemyCombat != null && enemyCombat.IsInMeleeCombat)
+
+        if (enemyCombat != null && enemyCombat.IsLocked)
+        {
+            currentTarget = null;
             return;
+        }
         if (isAttacking) return;
         FindTarget();
 
@@ -82,9 +85,12 @@ public class EnemyShooter : MonoBehaviour
             if (!hit) continue;
             if (!hit.gameObject.activeInHierarchy) continue;
 
-            SoldierHealth health = hit.GetComponent<SoldierHealth>();
-            if (health == null) continue;
+            var sHealth = hit.GetComponent<SoldierHealth>();
+            var dHeatlh = hit.GetComponent<DefenseHealth>();
+            
+            if(sHealth==null&& dHeatlh==null)continue;
 
+          
             float d = Vector2.Distance(transform.position, hit.transform.position);
             if (d < closest)
             {

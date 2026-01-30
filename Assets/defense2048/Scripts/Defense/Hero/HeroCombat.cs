@@ -2,20 +2,19 @@ using UnityEngine;
 
 public class HeroCombat : MonoBehaviour
 {
-    [Header("Combat")]
-    public float attackCooldown = 1.2f;
+    [Header("Combat")] public float attackCooldown = 1.2f;
     public int damage = 2;
     public float detectRange = 2.5f;
     public LayerMask enemyLayer;
 
-    [Header("AOE")]
-    public float aoeRange = 1.5f;
+    [Header("AOE")] public float aoeRange = 1.5f;
 
     private float lastAttackTime;
     private EnemyCombat enemy;
     private bool isInPosition;
 
     private HeroAnimation heroAnim;
+    public EnemyCombat GetCurrentEnemy() => enemy;
 
     private void Awake()
     {
@@ -24,24 +23,34 @@ public class HeroCombat : MonoBehaviour
 
     private void Update()
     {
-        if (enemy == null)
+        // Nếu ĐÃ có enemy, chỉ kiểm tra xem nó chết chưa
+        if (enemy != null)
         {
-            TryFindEnemyImmediate();
-                return;
+            if (!enemy.gameObject.activeInHierarchy)
+            {
+                StopCombat(); // Chỉ reset khi enemy chết
+            }
+            else if (isInPosition) 
+            {
+                // Tấn công nếu đã đứng đúng vị trí
+                if (Time.time >= lastAttackTime + attackCooldown)
+                {
+                    lastAttackTime = Time.time;
+                    heroAnim.PlayAttack();
+                }
+            }
+            return; // ĐÃ CÓ TARGET THÌ KHÔNG TÌM NỮA
         }
-        if(!isInPosition)return;
-        if (Time.time < lastAttackTime + attackCooldown) return;
 
-        lastAttackTime = Time.time;
-        heroAnim.PlayAttack();
+        // Nếu CHƯA có enemy, mới đi tìm
+        TryFindEnemyImmediate();
     }
 
     public bool TryFindEnemyImmediate()
     {
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, detectRange, enemyLayer);
-
-        float closest = Mathf.Infinity;
         EnemyCombat best = null;
+        float closest = Mathf.Infinity;
 
         foreach (var hit in hits)
         {
@@ -49,20 +58,18 @@ public class HeroCombat : MonoBehaviour
             if (e == null || e.IsLocked) continue;
 
             float d = Vector2.Distance(transform.position, e.transform.position);
-            if (d < closest)
-            {
-                closest = d;
-                best = e;
-            }
+            if (d < closest) { closest = d; best = e; }
         }
 
         if (best != null)
         {
             enemy = best;
+            enemy.PreLockTarget(this.transform);
+            
             GetComponent<HeroMove>().MoveToEnemy(best.transform);
+        
             return true;
         }
-
         return false;
     }
 
@@ -75,17 +82,26 @@ public class HeroCombat : MonoBehaviour
             enemyLayer
         );
 
+        bool currentEnemyStillAlive = false;
+
         foreach (var hit in hits)
         {
             EnemyHeath eh = hit.GetComponent<EnemyHeath>();
             if (eh != null && eh.gameObject.activeInHierarchy)
             {
                 eh.TakeDamage(damage);
+
+                if (enemy != null && eh.gameObject == enemy.gameObject)
+                {
+                    currentEnemyStillAlive = true;
+                }
             }
-            else
-            {
-                StopCombat();
-            }
+           
+        }
+
+        if (enemy != null && !currentEnemyStillAlive)
+        {
+            StopCombat();
         }
     }
 
@@ -101,5 +117,4 @@ public class HeroCombat : MonoBehaviour
         lastAttackTime = 0;
         heroAnim.PlayIdle();
     }
-   
 }

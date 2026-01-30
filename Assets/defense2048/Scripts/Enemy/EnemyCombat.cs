@@ -38,6 +38,14 @@ public class EnemyCombat : MonoBehaviour
         if (soldier != null)
             FaceTarget(transform, soldier);
 
+        if (IsLocked)
+        {
+            if (soldier == null || !soldier.gameObject.activeInHierarchy)
+            {
+                ResetToWalking();
+                return;
+            }
+        }
         switch (state)
         {
             case CombatState.Walking:
@@ -58,6 +66,7 @@ public class EnemyCombat : MonoBehaviour
         {
             state = CombatState.Walking;
             IsLocked = false;
+            ResetToWalking();
         }
 
     }
@@ -106,25 +115,29 @@ public class EnemyCombat : MonoBehaviour
         }
     }
 
+
+    // Bạn có thể tạo hàm này trong EnemyCombat để Hero gọi lúc bắt đầu đi tới
+    public void LockByHero(Transform heroTf)
+    {
+        soldier = heroTf;
+        target = heroTf.GetComponent<DefenseHealth>();
+        IsLocked = true;
+        state = CombatState.Waiting; // ĐỨNG ĐỢI, CHƯA ĐÁNH MELEE
+        enemyMove.StopMove();
+        enemyAnim.PlayIdle(); 
+    }
+
+// Hàm này sẽ được gọi từ HeroMove khi Hero đã đi đến nơi
     public void OnSoldierArrived(Transform soldierTf)
     {
         soldier = soldierTf;
-        state = CombatState.Attacking;
+        state = CombatState.Attacking; // BÂY GIỜ MỚI CHUYỂN SANG ATTACK
+        IsLocked = true;
 
-    
-
-        var sc = soldier.GetComponent<SoldierCombat>();
-        if (sc != null)
-            sc.StartCombat(this);
+        EnemyShooter shooter = GetComponent<EnemyShooter>();
+        if (shooter != null) shooter.enabled = false; 
     }
-
-
-    void RestoreMoveDirection()
-    {
-        Vector3 scale = transform.localScale;
-        scale.x = Mathf.Abs(scale.x) * moveDirX;
-        transform.localScale = scale;
-    }
+ 
 
 
     void HandleAttack()
@@ -161,17 +174,15 @@ public class EnemyCombat : MonoBehaviour
         return null;
     }
 
-    public void OnTargetDead()
+    public void OnTargetDead() // Hoặc OnSoldierDead
     {
+        // ... code cũ
         IsLocked = false;
-        target = null;
-        soldier = null;
-
         state = CombatState.Walking;
 
+        // BẬT LẠI SHOOTER KHI HẾT MELEE
         EnemyShooter shooter = GetComponent<EnemyShooter>();
-        if (shooter != null)
-            shooter.enabled = true; // ✔ chỉ enable khi không còn soldier
+        if (shooter != null) shooter.enabled = true; 
 
         enemyMove.ResumeMove();
     }
@@ -186,6 +197,28 @@ public class EnemyCombat : MonoBehaviour
             shooter.enabled = true;
 
         enemyMove.ResumeMove();
+    }
+
+    private void ResetToWalking()
+    {
+        IsLocked = false;
+        target = null;
+        soldier = null;
+        state = CombatState.Walking;
+
+        EnemyShooter shooter = GetComponent<EnemyShooter>();
+        if (shooter != null) shooter.enabled = true;
+        
+        enemyMove?.ResumeMove();
+    }
+    // Gọi hàm này trong HeroCombat.TryFindEnemyImmediate thay vì OnSoldierArrived trực tiếp
+    public void PreLockTarget(Transform heroTf)
+    {
+        IsLocked = true;
+        soldier = heroTf;
+        state = CombatState.Waiting; // Đứng chờ, không được di chuyển
+        enemyMove.StopMove();
+        enemyAnim.PlayIdle();
     }
 
 

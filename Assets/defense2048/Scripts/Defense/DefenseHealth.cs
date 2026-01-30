@@ -40,7 +40,27 @@ public abstract class DefenseHealth : MonoBehaviour
         IsBusy = true;
         lockedEnemy = enemy;
 
-        GetComponent<SoldierMove>().MoveToEnemy(enemy.transform);
+      if(enemy==null)return;
+
+      HeroMove hMove = GetComponent<HeroMove>();
+      if (hMove != null)
+      {
+          hMove.MoveToEnemy(enemy.transform);
+          return;
+      }
+
+      SoldierMove sMove = GetComponent<SoldierMove>();
+      if (sMove != null)
+      {
+          sMove.MoveToEnemy(enemy.transform);
+      }
+    }
+    public void HeroLockTarget(EnemyCombat enemy)
+    {
+        IsBusy = true;
+        lockedEnemy = enemy;
+        // Không gọi SoldierMove ở đây nữa nếu là Hero
+        GetComponent<HeroMove>()?.MoveToEnemy(enemy.transform);
     }
     public void Unlock()
     {
