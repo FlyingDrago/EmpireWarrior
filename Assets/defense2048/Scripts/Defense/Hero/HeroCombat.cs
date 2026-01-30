@@ -2,12 +2,16 @@ using UnityEngine;
 
 public class HeroCombat : MonoBehaviour
 {
-    [Header("Combat")] public float attackCooldown = 1.2f;
+    [Header("Combat")]
+    public float attackCooldown = 1.2f;
     public int damage = 2;
     public float detectRange = 2.5f;
     public LayerMask enemyLayer;
 
-    [Header("AOE")] public float aoeRange = 1.5f;
+    [Header("AOE")]
+    public float aoeRange = 1.5f;
+    public GameObject aoeEffectPrefab;
+    public float effectDestroyTime = 0.5f;
 
     private float lastAttackTime;
     private EnemyCombat enemy;
@@ -76,6 +80,12 @@ public class HeroCombat : MonoBehaviour
 
     public void AnimDealDamage()
     {
+        if (aoeEffectPrefab != null)
+        {
+            GameObject effect = Instantiate(aoeEffectPrefab, transform.position, Quaternion.identity);
+            Destroy(effect,effectDestroyTime);
+        }
+
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
             aoeRange,

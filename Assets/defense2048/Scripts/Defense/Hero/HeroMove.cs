@@ -51,7 +51,7 @@ public class HeroMove : MonoBehaviour
     public void MoveToEnemy(Transform enemy)
     {
         // Khoảng cách ngang chuẩn 1 unit
-        float combatDistanceX = 1.0f; 
+        float combatDistanceX = 0.6f; 
 
         // Xác định hướng đứng dựa trên vị trí X
         float direction = (transform.position.x < enemy.position.x) ? -1f : 1f;
