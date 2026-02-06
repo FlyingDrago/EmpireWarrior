@@ -27,31 +27,34 @@ public class HeroCombat : MonoBehaviour
 
     private void Update()
     {
-        // Nếu ĐÃ có enemy, chỉ kiểm tra xem nó chết chưa
         if (enemy != null)
         {
             if (!enemy.gameObject.activeInHierarchy)
             {
-                StopCombat(); // Chỉ reset khi enemy chết
+                StopCombat();
             }
             else if (isInPosition) 
             {
-                // Tấn công nếu đã đứng đúng vị trí
+               
                 if (Time.time >= lastAttackTime + attackCooldown)
                 {
                     lastAttackTime = Time.time;
                     heroAnim.PlayAttack();
                 }
-            }
-            return; // ĐÃ CÓ TARGET THÌ KHÔNG TÌM NỮA
+               
+            }  
+            return;
+         
         }
 
-        // Nếu CHƯA có enemy, mới đi tìm
+        
         TryFindEnemyImmediate();
     }
 
     public bool TryFindEnemyImmediate()
     {
+        if (enemy != null) return false;
+        
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, detectRange, enemyLayer);
         EnemyCombat best = null;
         float closest = Mathf.Infinity;
@@ -68,10 +71,19 @@ public class HeroCombat : MonoBehaviour
         if (best != null)
         {
             enemy = best;
-            enemy.PreLockTarget(this.transform);
-            
-            GetComponent<HeroMove>().MoveToEnemy(best.transform);
-        
+
+            float distToEnemy = Vector2.Distance(transform.position, best.transform.position);
+            float combatThreshold = 1.1f;
+            if (distToEnemy <= combatThreshold)
+            {
+                enemy.OnSoldierArrived(this.transform);
+                SetInPosition(true);
+            }
+            else
+            {
+                enemy.PreLockTarget(this.transform);
+                GetComponent<HeroMove>().MoveToEnemy(best.transform);
+            }
             return true;
         }
         return false;
@@ -80,12 +92,18 @@ public class HeroCombat : MonoBehaviour
 
     public void AnimDealDamage()
     {
+        
+        
         if (aoeEffectPrefab != null)
         {
             GameObject effect = Instantiate(aoeEffectPrefab, transform.position, Quaternion.identity);
             Destroy(effect,effectDestroyTime);
         }
 
+        if (enemy != null)
+        {
+            enemy.GetComponent<EnemyHeath>()?.TakeDamage(damage);
+        }
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             transform.position,
             aoeRange,
@@ -124,7 +142,7 @@ public class HeroCombat : MonoBehaviour
     {
         enemy = null;
         isInPosition = false;
-        lastAttackTime = 0;
+        
         heroAnim.PlayIdle();
     }
 }

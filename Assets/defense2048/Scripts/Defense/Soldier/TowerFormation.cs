@@ -18,7 +18,8 @@ public class TowerFormation : MonoBehaviour
 
 
     private Transform formationAnchor;
-    private readonly List<Vector3> formationOffsets = new();
+    private readonly Dictionary<Vector3, GameObject> activeSoldiers = new Dictionary<Vector3, GameObject>();
+    private readonly List<Vector3> formationOffsets = new List<Vector3>();
 
     private void Start()
     {
@@ -72,6 +73,11 @@ public class TowerFormation : MonoBehaviour
         formationOffsets.Add(new Vector3(0, formationRadius, 0));
         formationOffsets.Add(new Vector3(-formationRadius, -formationRadius * 0.5f, 0));
         formationOffsets.Add(new Vector3(formationRadius, -formationRadius * 0.5f, 0));
+
+        foreach (var offset in formationOffsets)
+        {
+            activeSoldiers[offset] = null;
+        }
     }
 
     void SpawnInitialSoldiers()
@@ -88,6 +94,11 @@ public class TowerFormation : MonoBehaviour
 
     void SpawnSoldier(Vector3 offset)
     {
+        if (activeSoldiers.ContainsKey(offset) && activeSoldiers[offset] != null)
+        {
+            return;
+        }
+        
         Vector3 spawnPos = soldierSpawnPoint != null
             ? soldierSpawnPoint.position
             : transform.position;
@@ -97,6 +108,7 @@ public class TowerFormation : MonoBehaviour
             spawnPos,
             Quaternion.identity
         );
+        activeSoldiers[offset] = soldierObj;
 
         SoldierMove move = soldierObj.GetComponent<SoldierMove>();
         SoldierHealth health = soldierObj.GetComponent<SoldierHealth>();
@@ -109,13 +121,35 @@ public class TowerFormation : MonoBehaviour
 
     public void OnSoldierDead(SoldierHealth deadSoldier)
     {
+        Vector3 deadOffset = deadSoldier.formationOffset;
+
+        if (activeSoldiers.ContainsKey(deadOffset))
+        {
+            activeSoldiers[deadOffset] = null;
+        }
+        
         StartCoroutine(RespawnSoldier(deadSoldier.formationOffset));
     }
 
     IEnumerator RespawnSoldier(Vector3 offset)
     {
         yield return new WaitForSeconds(respawnDelay);
-        SpawnSoldier(offset);
+        if (activeSoldiers[offset] == null)
+        {
+            SpawnSoldier(offset);
+        }
+      
+    }
+
+    public bool IsFullCapacity()
+    {
+        int count = 0;
+        foreach (var soldier in activeSoldiers.Values)
+        {
+            if (soldier != null) count++;
+        }
+
+        return count >= 3;
     }
 
     #endregion

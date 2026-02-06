@@ -35,8 +35,7 @@ public class EnemyCombat : MonoBehaviour
 
     void Update()
     {
-        if (soldier != null)
-            FaceTarget(transform, soldier);
+        HandleFacing();
 
         if (IsLocked)
         {
@@ -46,6 +45,10 @@ public class EnemyCombat : MonoBehaviour
                 return;
             }
         }
+      
+
+    
+
         switch (state)
         {
             case CombatState.Walking:
@@ -62,10 +65,8 @@ public class EnemyCombat : MonoBehaviour
                 break;
         }
 
-        if (state != CombatState.Walking && target == null)
+        if (state == CombatState.Attacking && soldier == null && target == null)
         {
-            state = CombatState.Walking;
-            IsLocked = false;
             ResetToWalking();
         }
 
@@ -81,8 +82,6 @@ public class EnemyCombat : MonoBehaviour
             var sc = soldier.GetComponent<SoldierCombat>();
             if (sc != null)
                 sc.StopCombat();
-
-         
         }
 
         soldier = null;
@@ -116,28 +115,30 @@ public class EnemyCombat : MonoBehaviour
     }
 
 
-    // Bạn có thể tạo hàm này trong EnemyCombat để Hero gọi lúc bắt đầu đi tới
     public void LockByHero(Transform heroTf)
     {
         soldier = heroTf;
         target = heroTf.GetComponent<DefenseHealth>();
         IsLocked = true;
-        state = CombatState.Waiting; // ĐỨNG ĐỢI, CHƯA ĐÁNH MELEE
+        state = CombatState.Waiting;
         enemyMove.StopMove();
-        enemyAnim.PlayIdle(); 
+        enemyAnim.PlayIdle();
     }
 
-// Hàm này sẽ được gọi từ HeroMove khi Hero đã đi đến nơi
+
     public void OnSoldierArrived(Transform soldierTf)
     {
         soldier = soldierTf;
-        state = CombatState.Attacking; // BÂY GIỜ MỚI CHUYỂN SANG ATTACK
+        target = soldierTf.GetComponent<DefenseHealth>();
+        
         IsLocked = true;
+        state = CombatState.Attacking;
+        
+        enemyMove.StopMove();
 
         EnemyShooter shooter = GetComponent<EnemyShooter>();
-        if (shooter != null) shooter.enabled = false; 
+        if (shooter != null) shooter.enabled = false;
     }
- 
 
 
     void HandleAttack()
@@ -174,18 +175,16 @@ public class EnemyCombat : MonoBehaviour
         return null;
     }
 
-    public void OnTargetDead() // Hoặc OnSoldierDead
+    public void OnTargetDead()
     {
-        // ... code cũ
         IsLocked = false;
         state = CombatState.Walking;
 
-        // BẬT LẠI SHOOTER KHI HẾT MELEE
-        EnemyShooter shooter = GetComponent<EnemyShooter>();
-        if (shooter != null) shooter.enabled = true; 
 
-        enemyMove.ResumeMove();
+        EnemyShooter shooter = GetComponent<EnemyShooter>();
+        if (shooter != null) shooter.enabled = true;
     }
+
     public void OnSoldierDead()
     {
         soldier = null;
@@ -208,31 +207,63 @@ public class EnemyCombat : MonoBehaviour
 
         EnemyShooter shooter = GetComponent<EnemyShooter>();
         if (shooter != null) shooter.enabled = true;
-        
-        enemyMove?.ResumeMove();
-    }
-    // Gọi hàm này trong HeroCombat.TryFindEnemyImmediate thay vì OnSoldierArrived trực tiếp
-    public void PreLockTarget(Transform heroTf)
-    {
-        IsLocked = true;
-        soldier = heroTf;
-        state = CombatState.Waiting; // Đứng chờ, không được di chuyển
-        enemyMove.StopMove();
-        enemyAnim.PlayIdle();
+        if (enemyMove != null)
+            enemyMove?.ResumeMove();
     }
 
+    public void PreLockTarget(Transform heroTf)
+    {
+        if (IsLocked) return;
+
+        IsLocked = true;
+        soldier = heroTf;
+        state = CombatState.Waiting;
+
+        
+        if(enemyMove!=null)enemyMove.StopMove();
+        if(enemyAnim!=null)enemyAnim.PlayIdle();
+     
+    }
+
+    private void HandleFacing()
+    {
+        if (soldier != null)
+        {
+            FaceTarget(transform, soldier);
+        }
+
+        else if (state == CombatState.Walking && enemyMove != null)
+        {
+            if (enemyMove.pathPoints != null && enemyMove._currentIndex < enemyMove.pathPoints.Count)
+            {
+                Vector3 nextWaypoint = enemyMove.pathPoints[enemyMove._currentIndex].position;
+                UpdateFacingByPoint(nextWaypoint);
+            }
+        }
+    }
+
+    private void UpdateFacingByPoint(Vector3 targetPoint)
+    {
+        Vector3 scale = transform.localScale;
+
+        if (targetPoint.x < transform.position.x)
+            scale.x = Mathf.Abs(scale.x);
+        else
+            scale.x = -Mathf.Abs(scale.x);
+        transform.localScale = scale;
+    }
 
 
     public static void FaceTarget(Transform self, Transform target)
     {
         if (!self || !target) return;
 
-        Vector3 scale = self.localScale;
+        float diff = target.position.x - self.position.x;
+        if (Mathf.Abs(diff) < 0.05f) return;
 
-        if (self.position.x > target.position.x)
-            scale.x = Mathf.Abs(scale.x); // quay sang phải
-        else
-            scale.x = -Mathf.Abs(scale.x); // quay sang trái
+        Vector3 scale = self.localScale;
+        if (diff < 0) scale.x = Mathf.Abs(scale.x);
+        else scale.x = -Mathf.Abs(scale.x);
 
         self.localScale = scale;
     }

@@ -638,7 +638,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d5c9a579adca4e85ae842518eb30da3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackCooldown: 1.5
+  attackCooldown: 1
   damage: 2
   detectRange: 2.5
   enemyLayer:
@@ -659,7 +659,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ccc6fc03c94f4343932185a0857bf61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 10
+  maxHp: 15
 --- !u!114 &442521732
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -672,6 +672,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97d9a3d79eb834f3f8f3e09d0feba819, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  selectionPrefab: {fileID: 1592898384714190, guid: 7e004c518a7a8454a823e8b88324e83a, type: 3}
+  ClickEffectPrefab: {fileID: 1951264298566255, guid: e7997119af10edc47a6075e83aa521f0, type: 3}
 --- !u!114 &442521733
 MonoBehaviour:
   m_ObjectHideFlags: 0
