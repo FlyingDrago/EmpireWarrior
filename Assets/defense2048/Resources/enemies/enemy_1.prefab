@@ -201,7 +201,7 @@ GameObject:
   - component: {fileID: 5615296655023432988}
   - component: {fileID: 7032044963018225330}
   - component: {fileID: 3176339506275613552}
-  - component: {fileID: 2347473100267140709}
+  - component: {fileID: 1297176263753916942}
   m_Layer: 7
   m_Name: enemy_1
   m_TagString: enemy
@@ -449,8 +449,9 @@ MonoBehaviour:
   firePoint: {fileID: 5583672441347008968}
   bulletSpeed: 8
   hitEffectPrefab: {fileID: 1088625214339013, guid: 9a750e7e370878f4e8a1bab682feeb59, type: 3}
-  currentTarget: {fileID: 0}
---- !u!114 &2347473100267140709
+  meleeOffset: 0.6
+  meleeSpeed: 3
+--- !u!114 &1297176263753916942
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -113,7 +113,7 @@ public class TowerFormation : MonoBehaviour
         SoldierMove move = soldierObj.GetComponent<SoldierMove>();
         SoldierHealth health = soldierObj.GetComponent<SoldierHealth>();
 
-        move.SetFormaiton(formationAnchor, offset);
+        move.SetFormation(formationAnchor, offset);
 
         health.ownerTower = this;
         health.formationOffset = offset;

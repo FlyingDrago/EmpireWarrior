@@ -6,7 +6,9 @@ public class HeroMove : MonoBehaviour
     public float moveSpeed = 3f;
     private Vector3 targetPos;
     private bool moving;
+    public bool IsMoving => moving;
     private HeroAnimation heroAnimation;
+    private EnemyCombat movingToEnemy;
     private SpriteRenderer spriteRenderer;
 
     private void Awake()
@@ -21,7 +23,7 @@ public class HeroMove : MonoBehaviour
     {
         if (!moving) return;
 
-        // Di chuyển mượt mà tới điểm mục tiêu
+
         transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
 
         // Lật mặt Sprite chuẩn xác
@@ -34,23 +36,25 @@ public class HeroMove : MonoBehaviour
         // Kiểm tra khoảng cách cực nhỏ để dừng lại (dùng sqrMagnitude để tối ưu hiệu năng)
         if ((transform.position - targetPos).sqrMagnitude < 0.001f)
         {
-            transform.position = targetPos; // Khớp vị trí tuyệt đối
+            transform.position = targetPos; 
             moving = false;
 
-            // Kích hoạt trạng thái Melee cho Enemy
-            var enemyScript = GetComponent<HeroCombat>()?.GetCurrentEnemy();
-            if (enemyScript != null)
+            if (movingToEnemy != null)
             {
-                enemyScript.OnSoldierArrived(this.transform);
+                movingToEnemy.OnSoldierArrived(transform);
             }
 
             GetComponent<HeroCombat>()?.SetInPosition(true);
             heroAnimation.PlayIdle();
+
+            movingToEnemy = null;
+
         }
     }
     public void MoveToEnemy(Transform enemy)
     {
-        // Khoảng cách ngang chuẩn 1 unit
+        movingToEnemy = enemy.GetComponent<EnemyCombat>();
+        
         float combatDistanceX = 0.6f; 
 
         // Xác định hướng đứng dựa trên vị trí X

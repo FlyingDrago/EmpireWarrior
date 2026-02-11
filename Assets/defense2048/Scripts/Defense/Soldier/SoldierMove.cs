@@ -12,12 +12,16 @@ public class SoldierMove : MonoBehaviour
     private SoldierAnimation anim;
 
     private SoldierState state;
+    public bool IsMovingToEnemy => state == SoldierState.ToEnemy;
+    public bool IsInCombat => state == SoldierState.InCombat;
+
 
     enum SoldierState
     {
         ToFormation,
         InFormation,
-        ToEnemy
+        ToEnemy,
+        InCombat
     }
 
     private void Awake()
@@ -47,7 +51,7 @@ public class SoldierMove : MonoBehaviour
 
     // ================= FORMATION =================
 
-    public void SetFormaiton(Transform anchor, Vector3 offset)
+    public void SetFormation(Transform anchor, Vector3 offset)
     {
         formationAnchor = anchor;
         formationOffset = offset;
@@ -71,8 +75,9 @@ public class SoldierMove : MonoBehaviour
 
     public void ReturnFormation()
     {
-        enemy = null;
         state = SoldierState.ToFormation;
+        enemy = null;
+        GetComponent<SoldierCombat>()?.SetInPosition(false);
         anim?.PlayMove();
     }
 
@@ -80,6 +85,8 @@ public class SoldierMove : MonoBehaviour
 
     public void MoveToEnemy(Transform enemyTf)
     {
+        if(state==SoldierState.ToEnemy|| state==SoldierState.InCombat)return;
+        
         enemy = enemyTf;
         state = SoldierState.ToEnemy;
         anim?.PlayMove();
@@ -103,14 +110,20 @@ public class SoldierMove : MonoBehaviour
 
         if (Reached(targetPos))
         {
-            anim?.PlayIdle();
-            state = SoldierState.InFormation;
+            // anim?.PlayIdle();
+            state = SoldierState.InCombat;
 
-            enemy.GetComponent<EnemyCombat>()
-                ?.OnSoldierArrived(transform);
+            var ec = enemy.GetComponent<EnemyCombat>();
+            ec?.OnSoldierArrived(transform);
+
+
+            var shooter = enemy.GetComponent<EnemyShooter>();
+            shooter?.BeginMeleeFight();
 
             GetComponent<SoldierCombat>()
                 ?.SetInPosition(true);
+            
+            return;
         }
     }
 

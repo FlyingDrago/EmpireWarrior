@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 
 public class EnemyCombat : MonoBehaviour
 {
@@ -10,27 +11,19 @@ public class EnemyCombat : MonoBehaviour
     public int damage = 1;
 
     private float lastAttackTime;
-    private float moveDirX;
-
     private EnemyAnimation enemyAnim;
     private EnemyMove enemyMove;
-
     private DefenseHealth target;
     private Transform soldier;
-    private EnemyHeath _enemyHeath;
 
     public CombatState state = CombatState.Walking;
-
-    public bool HasTarget => target != null;
     public bool IsLocked { get; private set; }
-    public bool IsInMeleeCombat => state == CombatState.Attacking;
 
 
     void Awake()
     {
         enemyAnim = GetComponent<EnemyAnimation>();
         enemyMove = GetComponent<EnemyMove>();
-        _enemyHeath = GetComponent<EnemyHeath>();
     }
 
     void Update()
@@ -45,10 +38,7 @@ public class EnemyCombat : MonoBehaviour
                 return;
             }
         }
-      
-
-    
-
+        
         switch (state)
         {
             case CombatState.Walking:
@@ -69,7 +59,6 @@ public class EnemyCombat : MonoBehaviour
         {
             ResetToWalking();
         }
-
     }
 
     public void OnDead()
@@ -113,27 +102,15 @@ public class EnemyCombat : MonoBehaviour
             enemyAnim.PlayIdle();
         }
     }
-
-
-    public void LockByHero(Transform heroTf)
-    {
-        soldier = heroTf;
-        target = heroTf.GetComponent<DefenseHealth>();
-        IsLocked = true;
-        state = CombatState.Waiting;
-        enemyMove.StopMove();
-        enemyAnim.PlayIdle();
-    }
-
-
+    
     public void OnSoldierArrived(Transform soldierTf)
     {
         soldier = soldierTf;
         target = soldierTf.GetComponent<DefenseHealth>();
-        
+
         IsLocked = true;
         state = CombatState.Attacking;
-        
+
         enemyMove.StopMove();
 
         EnemyShooter shooter = GetComponent<EnemyShooter>();
@@ -175,16 +152,6 @@ public class EnemyCombat : MonoBehaviour
         return null;
     }
 
-    public void OnTargetDead()
-    {
-        IsLocked = false;
-        state = CombatState.Walking;
-
-
-        EnemyShooter shooter = GetComponent<EnemyShooter>();
-        if (shooter != null) shooter.enabled = true;
-    }
-
     public void OnSoldierDead()
     {
         soldier = null;
@@ -219,10 +186,9 @@ public class EnemyCombat : MonoBehaviour
         soldier = heroTf;
         state = CombatState.Waiting;
 
-        
-        if(enemyMove!=null)enemyMove.StopMove();
-        if(enemyAnim!=null)enemyAnim.PlayIdle();
-     
+
+        if (enemyMove != null) enemyMove.StopMove();
+        if (enemyAnim != null) enemyAnim.PlayIdle();
     }
 
     private void HandleFacing()
@@ -241,6 +207,16 @@ public class EnemyCombat : MonoBehaviour
             }
         }
     }
+
+    public Transform GetCurrentTarget()
+    {
+        return soldier;
+    }
+    public bool IsInMelee()
+    {
+        return state == CombatState.Attacking;
+    }
+
 
     private void UpdateFacingByPoint(Vector3 targetPoint)
     {
@@ -267,4 +243,6 @@ public class EnemyCombat : MonoBehaviour
 
         self.localScale = scale;
     }
+    
+
 }

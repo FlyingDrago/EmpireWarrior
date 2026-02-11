@@ -16,6 +16,7 @@ public class SoldierCombat : MonoBehaviour
 
     private bool isInPosition;
 
+
     private void Awake()
     {
         SoldierAnimation = GetComponent<SoldierAnimation>();
@@ -49,7 +50,6 @@ public class SoldierCombat : MonoBehaviour
                     lastAttackTime = Time.time;
 
                     SoldierAnimation.PlayAttack();
-                    StartCombat(enemy);
                 }
             }
 
@@ -63,8 +63,13 @@ public class SoldierCombat : MonoBehaviour
 
     public bool TryFindEnemyImmediate()
     {
+        var move = GetComponent<SoldierMove>();
+
         if (enemy != null) return false;
-        
+        if (move.IsMovingToEnemy) return false;
+        if (move.IsInCombat) return false;
+
+
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, detectRange, enemyLayer);
 
         float closest = Mathf.Infinity;
@@ -73,7 +78,12 @@ public class SoldierCombat : MonoBehaviour
         foreach (var hit in hits)
         {
             EnemyCombat e = hit.GetComponent<EnemyCombat>();
-            if (e == null || e.IsLocked) continue;
+            if (e == null) continue;
+            
+            if (e.IsLocked && e.GetCurrentTarget() != transform)
+                continue;
+
+
 
             float d = Vector2.Distance(transform.position, e.transform.position);
             if (d < closest)
@@ -85,7 +95,7 @@ public class SoldierCombat : MonoBehaviour
 
         if (best != null)
         {
-            GetComponent<SoldierMove>().MoveToEnemy(best.transform);
+            SetEnemy(best);
             return true;
         }
 
@@ -110,17 +120,19 @@ public class SoldierCombat : MonoBehaviour
             EnemyHeath eh = enemy.GetComponent<EnemyHeath>();
             if (eh != null)
                 eh.OnEnemyDead -= StopCombat;
+            var shooter = enemy?.GetComponent<EnemyShooter>();
+            shooter?.ExitMelee();
+            
+            if(enemy.gameObject.activeInHierarchy)enemy.OnSoldierDead();
         }
-
-        enemy.OnSoldierDead();
-
-
+        
         enemy = null;
         isInPosition = false;
         lastAttackTime = 0;
 
         if (this != null && gameObject.activeInHierarchy) SoldierAnimation?.PlayIdle();
 
+      
 
         SoldierMove move = GetComponent<SoldierMove>();
         if (move != null)
@@ -131,6 +143,38 @@ public class SoldierCombat : MonoBehaviour
     public void SetInPosition(bool v)
     {
         isInPosition = v;
+
+        if (v && enemy != null)
+        {
+            var shooter = enemy.GetComponent<EnemyShooter>();
+            shooter?.BeginMeleeFight();
+        }
+    }
+
+
+    private void SetEnemy(EnemyCombat newEnemy)
+    {
+        if (enemy != null) return;
+
+        enemy = newEnemy;
+        isInPosition = false;
+
+        EnemyHeath eh = enemy.GetComponent<EnemyHeath>();
+        if (eh != null)
+            eh.OnEnemyDead += StopCombat;
+
+
+        enemy.PreLockTarget(transform);
+
+
+        EnemyShooter shooter = enemy.GetComponent<EnemyShooter>();
+        if (shooter != null)
+        {
+            shooter.EnterMelee(transform);
+        }
+
+        GetComponent<SoldierMove>().MoveToEnemy(enemy.transform);
+
     }
 
 
