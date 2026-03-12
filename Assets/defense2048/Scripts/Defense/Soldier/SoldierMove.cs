@@ -6,15 +6,21 @@ public class SoldierMove : MonoBehaviour
     public float combatOffset = 0.6f;
 
     private Transform enemy;
+    private EnemyCombat enemyCombat;
+    private EnemyShooter enemyShooter;
+
     private Transform formationAnchor;
     private Vector3 formationOffset;
 
     private SoldierAnimation anim;
+    private SoldierCombat combat;
 
     private SoldierState state;
+
+    private int combatSlot = -1;
+
     public bool IsMovingToEnemy => state == SoldierState.ToEnemy;
     public bool IsInCombat => state == SoldierState.InCombat;
-
 
     enum SoldierState
     {
@@ -24,18 +30,28 @@ public class SoldierMove : MonoBehaviour
         InCombat
     }
 
-    private void Awake()
+    void Awake()
     {
         anim = GetComponent<SoldierAnimation>();
+        combat = GetComponent<SoldierCombat>();
     }
 
-    private void OnEnable()
+    void OnEnable()
     {
+        enemy = null;
+        enemyCombat = null;
+        enemyShooter = null;
+
         state = SoldierState.ToFormation;
+
+        if (combat != null)
+        {
+            combat.StopCombat();
+        }
+
         anim?.PlayMove();
     }
-
-    private void Update()
+    void Update()
     {
         switch (state)
         {
@@ -59,11 +75,11 @@ public class SoldierMove : MonoBehaviour
 
     void UpdateMoveToFormation()
     {
-        if (formationAnchor == null) return;
+        if (!formationAnchor) return;
 
         Vector3 targetPos = formationAnchor.position + formationOffset;
 
-        FaceMoveDirection(targetPos); // 🔥 FLIP THEO HƯỚNG DI CHUYỂN
+        FaceMoveDirection(targetPos);
         Move(targetPos);
 
         if (Reached(targetPos))
@@ -75,55 +91,59 @@ public class SoldierMove : MonoBehaviour
 
     public void ReturnFormation()
     {
-        state = SoldierState.ToFormation;
         enemy = null;
-        GetComponent<SoldierCombat>()?.SetInPosition(false);
+        enemyCombat = null;
+        enemyShooter = null;
+
+        state = SoldierState.ToFormation;
+
+        combat?.SetInPosition(false);
         anim?.PlayMove();
     }
 
     // ================= COMBAT =================
 
-    public void MoveToEnemy(Transform enemyTf)
+    public void MoveToEnemy(Transform enemyTf, int slot)
     {
-        if(state==SoldierState.ToEnemy|| state==SoldierState.InCombat)return;
-        
+        // if (state == SoldierState.ToEnemy || state == SoldierState.InCombat)
+        //     return;
+        if (slot < 0) return;
         enemy = enemyTf;
+
+
+        enemyCombat = enemy.GetComponent<EnemyCombat>();
+        enemyShooter = enemy.GetComponent<EnemyShooter>();
+
+
         state = SoldierState.ToEnemy;
         anim?.PlayMove();
     }
 
     void UpdateMoveToEnemy()
     {
-        if (enemy == null)
+        if (!enemy || !enemy.gameObject.activeInHierarchy)
         {
             ReturnFormation();
             return;
         }
 
-        Vector3 targetPos = enemy.position;
+        Vector3 targetPos = enemyCombat.GetSlotPosition(combatSlot);
+
         targetPos.x += transform.position.x < enemy.position.x
             ? -combatOffset
             : combatOffset;
 
-        FaceMoveDirection(targetPos); // 🔥
+        FaceMoveDirection(targetPos);
         Move(targetPos);
 
-        if (Reached(targetPos))
+        float dist = Vector2.Distance(transform.position, enemy.position);
+
+        if (dist <= combatOffset + 0.05f)
         {
-            // anim?.PlayIdle();
             state = SoldierState.InCombat;
-
-            var ec = enemy.GetComponent<EnemyCombat>();
-            ec?.OnSoldierArrived(transform);
-
-
-            var shooter = enemy.GetComponent<EnemyShooter>();
-            shooter?.BeginMeleeFight();
-
-            GetComponent<SoldierCombat>()
-                ?.SetInPosition(true);
-            
-            return;
+            anim?.PlayIdle();
+            enemyCombat?.OnSoldierArrived(transform);
+            combat?.SetInPosition(true);
         }
     }
 
@@ -143,17 +163,6 @@ public class SoldierMove : MonoBehaviour
         return Vector3.Distance(transform.position, target) < 0.05f;
     }
 
-    public static void FaceTarget(Transform self, Transform target)
-    {
-        if (!self || !target) return;
-
-        Vector3 scale = self.localScale;
-        scale.x = self.position.x > target.position.x
-            ? Mathf.Abs(scale.x)
-            : -Mathf.Abs(scale.x);
-
-        self.localScale = scale;
-    }
     void FaceMoveDirection(Vector3 target)
     {
         float dx = target.x - transform.position.x;
@@ -161,11 +170,7 @@ public class SoldierMove : MonoBehaviour
         if (Mathf.Abs(dx) < 0.01f) return;
 
         Vector3 scale = transform.localScale;
-        scale.x = dx > 0
-            ? -Mathf.Abs(scale.x)   // đi sang phải → quay phải
-            : Mathf.Abs(scale.x);   // đi sang trái → quay trái
-
+        scale.x = dx > 0 ? -1 : 1;
         transform.localScale = scale;
     }
-
 }

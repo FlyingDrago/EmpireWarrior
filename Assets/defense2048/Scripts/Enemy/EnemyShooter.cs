@@ -1,15 +1,16 @@
+using System;
 using UnityEngine;
-using System.Collections;
 
 public class EnemyShooter : MonoBehaviour
 {
-    public System.Action<EnemyShooter> OnMeleeExit;
+    public Action<EnemyShooter> OnMeleeExit;
+
     enum CombatMode
     {
         None,
         Ranged,
-        Melee_Wait,
-        Melee_Fight
+        MeleeWait,
+        MeleeFight
     }
 
     [Header("Ranged")]
@@ -26,22 +27,22 @@ public class EnemyShooter : MonoBehaviour
 
     [Header("Melee")]
     public float meleeOffset = 0.8f;
-    public float meleeSpeed = 3f;
 
     private Transform currentTarget;
-    private int currentTargetID = -1;
-
     private CombatMode mode = CombatMode.None;
+
     private float lastAttackTime;
     private bool isAttacking;
+
+    private float scanTimer;
+    private const float SCAN_INTERVAL = 0.25f;
 
     private EnemyMove enemyMove;
     private EnemyAnimation enemyAnimation;
 
-    public bool IsInMelee => mode == CombatMode.Melee_Fight;
-    
+    public bool IsInMelee => mode == CombatMode.MeleeFight;
 
-    void Start()
+    void Awake()
     {
         enemyMove = GetComponent<EnemyMove>();
         enemyAnimation = GetComponent<EnemyAnimation>();
@@ -49,41 +50,34 @@ public class EnemyShooter : MonoBehaviour
 
     void Update()
     {
-        if (mode == CombatMode.Melee_Wait)
+        if (isAttacking && Time.time - lastAttackTime > attackCooldown + 1f)
+            isAttacking = false;
+
+        switch (mode)
         {
-            if (currentTarget == null || !currentTarget.gameObject.activeInHierarchy)
-            {
-                ExitMelee();
-                return;
-            }
-            FaceTarget();
-            return;
+            case CombatMode.MeleeWait:
+                UpdateMeleeWait();
+                break;
+
+            case CombatMode.MeleeFight:
+                UpdateMeleeFight();
+                break;
+
+            default:
+                UpdateRanged();
+                break;
         }
+    }
 
-        if (mode == CombatMode.Melee_Fight)
-        {
-            if (currentTarget == null || !currentTarget.gameObject.activeInHierarchy)
-            {
-                ExitMelee();
-                return;
-            }
-            FaceTarget();
+    // =========================
+    // RANGED
+    // =========================
 
-            if (!isAttacking &&
-                Time.time >= lastAttackTime + attackCooldown)
-            {
-                lastAttackTime = Time.time;
-                isAttacking = true;
-                enemyAnimation.PlayAttack();
-            }
-
-            return;
-        }
-
-
+    void UpdateRanged()
+    {
         if (isAttacking) return;
 
-        FindTarget();
+        ScanForTarget();
 
         if (currentTarget == null)
         {
@@ -94,15 +88,11 @@ public class EnemyShooter : MonoBehaviour
         enemyMove?.StopMove();
         FaceTarget();
 
-        if (Time.time - lastAttackTime >= attackCooldown)
+        if (Time.time >= lastAttackTime + attackCooldown)
         {
             StartRangedAttack();
         }
     }
-
-    // =========================
-    // RANGED
-    // =========================
 
     void StartRangedAttack()
     {
@@ -133,36 +123,49 @@ public class EnemyShooter : MonoBehaviour
     {
         isAttacking = false;
         lastAttackTime = Time.time;
+
+        if (mode == CombatMode.Ranged)
+            mode = CombatMode.None;
+
         enemyAnimation.OnAttackEnd();
     }
 
     // =========================
-    // MELEE MODE
+    // MELEE
     // =========================
 
     public void EnterMelee(Transform attacker)
     {
         currentTarget = attacker;
-        currentTargetID = attacker.GetInstanceID();
 
-        mode = CombatMode.Melee_Wait;
+        mode = CombatMode.MeleeWait;
 
         enemyMove?.StopMove();
         isAttacking = false;
     }
+
     public void BeginMeleeFight()
     {
-        if (mode != CombatMode.Melee_Wait) return;
+        if (mode != CombatMode.MeleeWait) return;
 
-        mode = CombatMode.Melee_Fight;
+        mode = CombatMode.MeleeFight;
         lastAttackTime = 0;
     }
 
-
-
-    void HandleMelee()
+    void UpdateMeleeWait()
     {
-        if (currentTarget == null)
+        if (!IsTargetValid())
+        {
+            ExitMelee();
+            return;
+        }
+
+        FaceTarget();
+    }
+
+    void UpdateMeleeFight()
+    {
+        if (!IsTargetValid())
         {
             ExitMelee();
             return;
@@ -170,87 +173,110 @@ public class EnemyShooter : MonoBehaviour
 
         FaceTarget();
 
-        Vector2 dir =
-            (currentTarget.position - transform.position).normalized;
-
-        Vector2 targetPos =
-            (Vector2)currentTarget.position - dir * meleeOffset;
-
-        transform.position = Vector2.MoveTowards(
-            transform.position,
-            targetPos,
-            meleeSpeed * Time.deltaTime);
-
-        float dist = Vector2.Distance(transform.position, targetPos);
-
-        if (dist < 0.05f)
+        if (!isAttacking && Time.time >= lastAttackTime + attackCooldown)
         {
-            enemyAnimation.PlayAttack(); // melee attack loop
+            lastAttackTime = Time.time;
+            isAttacking = true;
+
+            enemyAnimation.PlayAttack();
         }
     }
 
-   public void ExitMelee()
+    public void ExitMelee()
     {
-        var self = this;
-        
         mode = CombatMode.None;
         currentTarget = null;
-        currentTargetID = -1;
+
         isAttacking = false;
+        lastAttackTime = 0;
 
         enemyAnimation.OnAttackEnd();
         enemyMove?.ResumeMove();
-        
-        OnMeleeExit?.Invoke(self);
+
+        OnMeleeExit?.Invoke(this);
     }
 
     // =========================
-    // TARGET FIND
+    // TARGET
     // =========================
 
-    void FindTarget()
+    void ScanForTarget()
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(
-            transform.position,
-            attackRange,
-            targetLayer);
+        scanTimer += Time.deltaTime;
+
+        if (scanTimer < SCAN_INTERVAL) return;
+
+        scanTimer = 0;
+
+        Collider2D[] hits =
+            Physics2D.OverlapCircleAll(transform.position, attackRange, targetLayer);
 
         float closest = Mathf.Infinity;
-        Transform target = null;
+        Transform bestTarget = null;
 
         foreach (var hit in hits)
         {
-            if (!hit || !hit.gameObject.activeInHierarchy) continue;
+            if (!hit.gameObject.activeInHierarchy) continue;
+            if (hit.transform == transform) continue;
 
-            var s = hit.GetComponent<SoldierHealth>();
-            var d = hit.GetComponent<DefenseHealth>();
+            var health = hit.GetComponent<DefenseHealth>();
+            if (health == null) continue;
 
-            if (s == null && d == null) continue;
-
-            float dist =
-                Vector2.Distance(transform.position, hit.transform.position);
+            float dist = Vector2.Distance(transform.position, hit.transform.position);
 
             if (dist < closest)
             {
                 closest = dist;
-                target = hit.transform;
+                bestTarget = hit.transform;
             }
         }
 
-        currentTarget = target;
-        currentTargetID = target ? target.GetInstanceID() : -1;
+        currentTarget = bestTarget;
     }
+
+    bool IsTargetValid()
+    {
+        return currentTarget != null && currentTarget.gameObject.activeInHierarchy;
+    }
+
+    // =========================
+    // UTIL
+    // =========================
 
     void FaceTarget()
     {
         if (currentTarget == null) return;
 
         Vector3 scale = transform.localScale;
-        scale.x = currentTarget.position.x < transform.position.x
-            ? Mathf.Abs(scale.x)
-            : -Mathf.Abs(scale.x);
+
+        if (currentTarget.position.x < transform.position.x)
+            scale.x = Mathf.Abs(scale.x);
+        else
+            scale.x = -Mathf.Abs(scale.x);
 
         transform.localScale = scale;
+    }
+
+    public void ResetOnSpawn()
+    {
+        currentTarget = null;
+        mode = CombatMode.None;
+        isAttacking = false;
+
+        enemyAnimation?.OnAttackEnd();
+        enemyMove?.ResumeMove();
+    }
+
+    void OnEnable()
+    {
+        ResetOnSpawn();
+    }
+
+    void OnDisable()
+    {
+        currentTarget = null;
+        isAttacking = false;
+        mode = CombatMode.None;
     }
 
     void OnDrawGizmosSelected()

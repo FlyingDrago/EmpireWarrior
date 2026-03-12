@@ -6,7 +6,7 @@ public class TowerFormation : MonoBehaviour
 {
     [Header("Soldier")]
     [SerializeField] private GameObject soldierPrefab;
-    [SerializeField] private float respawnDelay = 3f;
+    [SerializeField] private float respawnDelay = 10f;
 
     [Header("Formation")]
     [SerializeField] private float formationRadius = 0.6f;
@@ -16,141 +16,147 @@ public class TowerFormation : MonoBehaviour
     [SerializeField] private string towerPointTag = "tower_point";
     [SerializeField] private Transform soldierSpawnPoint;
 
-
     private Transform formationAnchor;
-    private readonly Dictionary<Vector3, GameObject> activeSoldiers = new Dictionary<Vector3, GameObject>();
-    private readonly List<Vector3> formationOffsets = new List<Vector3>();
 
-    private void Start()
+    private List<Vector3> formationOffsets = new List<Vector3>();
+    private GameObject[] activeSoldiers;
+    private bool[] respawnRunning;
+
+    void Start()
     {
         FindFormationAnchor();
         CreateFormationOffsets();
+
+        activeSoldiers = new GameObject[formationOffsets.Count];
+        respawnRunning = new bool[formationOffsets.Count];
+
         SpawnInitialSoldiers();
     }
 
-    #region Find Anchor
+    // =========================
+    // FIND ANCHOR
+    // =========================
 
     void FindFormationAnchor()
     {
         GameObject[] points = GameObject.FindGameObjectsWithTag(towerPointTag);
 
         float minDist = Mathf.Infinity;
-        Transform nearest = null;
 
         foreach (var point in points)
         {
             float d = Vector2.Distance(transform.position, point.transform.position);
+
             if (d < minDist && d <= detectRadius)
             {
                 minDist = d;
-                nearest = point.transform;
+                formationAnchor = point.transform.GetChild(0);
             }
         }
 
-        if (nearest == null)
+        if (formationAnchor == null)
         {
-            Debug.LogError("❌ No TowerPoint found near tower!");
-            return;
+            Debug.LogError("No TowerPoint anchor found");
         }
-
-        if (nearest.childCount == 0)
-        {
-            Debug.LogError("❌ TowerPoint has no anchor child!");
-            return;
-        }
-
-        formationAnchor = nearest.GetChild(0);
     }
 
-    #endregion
-
-    #region Formation
+    // =========================
+    // FORMATION
+    // =========================
 
     void CreateFormationOffsets()
     {
         formationOffsets.Clear();
 
-        formationOffsets.Add(new Vector3(0, formationRadius, 0));
-        formationOffsets.Add(new Vector3(-formationRadius, -formationRadius * 0.5f, 0));
-        formationOffsets.Add(new Vector3(formationRadius, -formationRadius * 0.5f, 0));
-
-        foreach (var offset in formationOffsets)
-        {
-            activeSoldiers[offset] = null;
-        }
+        formationOffsets.Add(new Vector3(0, formationRadius));
+        formationOffsets.Add(new Vector3(-formationRadius, -formationRadius * 0.5f));
+        formationOffsets.Add(new Vector3(formationRadius, -formationRadius * 0.5f));
     }
 
     void SpawnInitialSoldiers()
     {
-        if (formationAnchor == null) return;
-
-        foreach (var offset in formationOffsets)
-            SpawnSoldier(offset);
+        for (int i = 0; i < formationOffsets.Count; i++)
+        {
+            SpawnSoldier(i);
+        }
     }
 
-    #endregion
+    // =========================
+    // SPAWN
+    // =========================
 
-    #region Spawn
-
-    void SpawnSoldier(Vector3 offset)
+    void SpawnSoldier(int index)
     {
-        if (activeSoldiers.ContainsKey(offset) && activeSoldiers[offset] != null)
-        {
-            return;
-        }
-        
-        Vector3 spawnPos = soldierSpawnPoint != null
-            ? soldierSpawnPoint.position
-            : transform.position;
+        if (formationAnchor == null) return;
 
-        GameObject soldierObj = Instantiate(
+        if (activeSoldiers[index] != null)
+            return;
+
+        Vector3 spawnPos =
+            soldierSpawnPoint != null ? soldierSpawnPoint.position : transform.position;
+
+        GameObject soldier = Instantiate(
             soldierPrefab,
             spawnPos,
             Quaternion.identity
         );
-        activeSoldiers[offset] = soldierObj;
 
-        SoldierMove move = soldierObj.GetComponent<SoldierMove>();
-        SoldierHealth health = soldierObj.GetComponent<SoldierHealth>();
+        activeSoldiers[index] = soldier;
 
-        move.SetFormation(formationAnchor, offset);
+        SoldierMove move = soldier.GetComponent<SoldierMove>();
+        SoldierHealth health = soldier.GetComponent<SoldierHealth>();
+
+        move.SetFormation(formationAnchor, formationOffsets[index]);
 
         health.ownerTower = this;
-        health.formationOffset = offset;
+        health.slotIndex = index;
     }
 
-    public void OnSoldierDead(SoldierHealth deadSoldier)
-    {
-        Vector3 deadOffset = deadSoldier.formationOffset;
+    // =========================
+    // SOLDIER DEAD
+    // =========================
 
-        if (activeSoldiers.ContainsKey(deadOffset))
-        {
-            activeSoldiers[deadOffset] = null;
-        }
-        
-        StartCoroutine(RespawnSoldier(deadSoldier.formationOffset));
+    public void OnSoldierDead(SoldierHealth dead)
+    {
+        int index = dead.slotIndex;
+
+        if (index < 0 || index >= activeSoldiers.Length)
+            return;
+
+        activeSoldiers[index] = null;
+
+        if (!respawnRunning[index])
+            StartCoroutine(RespawnSoldier(index));
     }
 
-    IEnumerator RespawnSoldier(Vector3 offset)
+    IEnumerator RespawnSoldier(int index)
     {
+        respawnRunning[index] = true;
+
         yield return new WaitForSeconds(respawnDelay);
-        if (activeSoldiers[offset] == null)
+
+        if (this == null) yield break;
+
+        if (activeSoldiers[index] == null)
         {
-            SpawnSoldier(offset);
+            SpawnSoldier(index);
         }
-      
+
+        respawnRunning[index] = false;
     }
+
+    // =========================
+    // CAPACITY
+    // =========================
 
     public bool IsFullCapacity()
     {
-        int count = 0;
-        foreach (var soldier in activeSoldiers.Values)
+        for (int i = 0; i < activeSoldiers.Length; i++)
         {
-            if (soldier != null) count++;
+            if (activeSoldiers[i] == null)
+                return false;
         }
 
-        return count >= 3;
+        return true;
     }
-
-    #endregion
 }

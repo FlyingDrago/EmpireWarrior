@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SoldierCombat : MonoBehaviour
@@ -11,66 +8,83 @@ public class SoldierCombat : MonoBehaviour
     public LayerMask enemyLayer;
 
     private float lastAttackTime;
+    [SerializeField]private bool isInPosition;
+
     private EnemyCombat enemy;
-    private SoldierAnimation SoldierAnimation;
+    private EnemyHeath enemyHealth;
+    private EnemyShooter enemyShooter;
 
-    private bool isInPosition;
+    private SoldierMove move;
+    private SoldierAnimation anim;
 
+    private float scanTimer;
+    private const float SCAN_INTERVAL = 0.25f;
 
-    private void Awake()
+    void Awake()
     {
-        SoldierAnimation = GetComponent<SoldierAnimation>();
+        move = GetComponent<SoldierMove>();
+        anim = GetComponent<SoldierAnimation>();
     }
 
-    public void StartCombat(EnemyCombat enemyCombat)
+    void Update()
     {
-        enemy = enemyCombat;
-        isInPosition = false;
-        enemy.GetComponent<EnemyHeath>().OnEnemyDead += StopCombat;
+        HandleCombat();
+        ScanEnemy();
     }
 
-    private void Update()
+    // =========================
+    // COMBAT
+    // =========================
+
+    void HandleCombat()
     {
-        if (enemy != null)
+        if (enemy == null) return;
+
+        if (!enemy.gameObject.activeInHierarchy)
         {
-            if (!enemy.gameObject.activeInHierarchy)
-            {
-                StopCombat();
-
-                return;
-            }
-
-
-            if (isInPosition)
-
-            {
-                if (Time.time >= lastAttackTime + attackCooldown)
-
-                {
-                    lastAttackTime = Time.time;
-
-                    SoldierAnimation.PlayAttack();
-                }
-            }
-
+            StopCombat();
             return;
         }
 
+        if (!isInPosition) return;
+        if (enemyHealth == null) return;
 
-        TryFindEnemyImmediate();
+        if (Time.time >= lastAttackTime + attackCooldown)
+        {
+            lastAttackTime = Time.time;
+            anim.PlayAttack();
+        }
     }
 
-
-    public bool TryFindEnemyImmediate()
+    public void AnimDealDamage()
     {
-        var move = GetComponent<SoldierMove>();
+        Debug.Log("DEAL DAMAGE");
+        if (enemyHealth == null) return;
 
-        if (enemy != null) return false;
-        if (move.IsMovingToEnemy) return false;
-        if (move.IsInCombat) return false;
+        if (!enemyHealth.gameObject.activeInHierarchy) return;
 
+        enemyHealth.TakeDamage(damage);
+    }
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, detectRange, enemyLayer);
+    // =========================
+    // TARGET FIND
+    // =========================
+
+    void ScanEnemy()
+    {
+        Debug.Log("SCAN ENEMY");
+        if (enemy != null) return;
+        if (move.IsMovingToEnemy) return;
+        if (move.IsInCombat) return;
+
+        scanTimer += Time.deltaTime;
+
+        if (scanTimer < SCAN_INTERVAL) return;
+
+        scanTimer = 0;
+
+        Collider2D[] hits =
+            Physics2D.OverlapCircleAll(transform.position, detectRange, enemyLayer);
 
         float closest = Mathf.Infinity;
         EnemyCombat best = null;
@@ -79,16 +93,15 @@ public class SoldierCombat : MonoBehaviour
         {
             EnemyCombat e = hit.GetComponent<EnemyCombat>();
             if (e == null) continue;
-            
+
             if (e.IsLocked && e.GetCurrentTarget() != transform)
                 continue;
 
+            float dist = Vector2.Distance(transform.position, e.transform.position);
 
-
-            float d = Vector2.Distance(transform.position, e.transform.position);
-            if (d < closest)
+            if (dist < closest)
             {
-                closest = d;
+                closest = dist;
                 best = e;
             }
         }
@@ -96,105 +109,99 @@ public class SoldierCombat : MonoBehaviour
         if (best != null)
         {
             SetEnemy(best);
-            return true;
         }
-
-        return false;
     }
 
-    public void AnimDealDamage()
+    // =========================
+    // SET ENEMY
+    // =========================
+
+    void SetEnemy(EnemyCombat newEnemy)
     {
-        if (enemy == null) return;
+        enemy = newEnemy;
 
-        EnemyHeath eh = enemy.GetComponent<EnemyHeath>();
-        if (eh == null || !eh.gameObject.activeInHierarchy) return;
+        enemyHealth = enemy.GetComponent<EnemyHeath>();
+        enemyShooter = enemy.GetComponent<EnemyShooter>();
 
-        eh.TakeDamage(damage);
-    }
-
-
-    public void StopCombat()
-    {
-        if (enemy != null)
-        {
-            EnemyHeath eh = enemy.GetComponent<EnemyHeath>();
-            if (eh != null)
-                eh.OnEnemyDead -= StopCombat;
-            var shooter = enemy?.GetComponent<EnemyShooter>();
-            shooter?.ExitMelee();
-            
-            if(enemy.gameObject.activeInHierarchy)enemy.OnSoldierDead();
-        }
-        
-        enemy = null;
         isInPosition = false;
-        lastAttackTime = 0;
 
-        if (this != null && gameObject.activeInHierarchy) SoldierAnimation?.PlayIdle();
+        if (enemyHealth != null)
+            enemyHealth.OnEnemyDead += StopCombat;
 
-      
-
-        SoldierMove move = GetComponent<SoldierMove>();
-        if (move != null)
-            move.ReturnFormation();
+        int slot = enemy.TryGetSlot(transform);
+        if (slot == -1)
+        {
+            enemy = null;
+            return;
+        }
+        enemy.PreLockTarget(transform);
+        move.MoveToEnemy(enemy.transform,slot);
     }
 
+    // =========================
+    // POSITION
+    // =========================
 
     public void SetInPosition(bool v)
     {
+        Debug.Log(" SET IN POSITION" + v);
         isInPosition = v;
 
-        if (v && enemy != null)
-        {
-            var shooter = enemy.GetComponent<EnemyShooter>();
-            shooter?.BeginMeleeFight();
-        }
+        if (!v || enemy == null) return;
+
+        anim.PlayIdle();
+
+        enemyShooter?.BeginMeleeFight();
+        anim.PlayAttack();
+        lastAttackTime = Time.time;
     }
 
+    // =========================
+    // STOP
+    // =========================
 
-    private void SetEnemy(EnemyCombat newEnemy)
+    public void StopCombat()
     {
-        if (enemy != null) return;
+        if (enemyHealth != null)
+            enemyHealth.OnEnemyDead -= StopCombat;
 
-        enemy = newEnemy;
+        if (enemyShooter != null)
+            enemyShooter.ExitMelee();
+
+        if (enemy != null && enemy.gameObject.activeInHierarchy)
+            enemy.OnSoldierDead();
+
+        enemy = null;
+        enemyHealth = null;
+        enemyShooter = null;
+
         isInPosition = false;
+        lastAttackTime = 0;
 
-        EnemyHeath eh = enemy.GetComponent<EnemyHeath>();
-        if (eh != null)
-            eh.OnEnemyDead += StopCombat;
+        anim?.PlayIdle();
 
-
-        enemy.PreLockTarget(transform);
-
-
-        EnemyShooter shooter = enemy.GetComponent<EnemyShooter>();
-        if (shooter != null)
-        {
-            shooter.EnterMelee(transform);
-        }
-
-        GetComponent<SoldierMove>().MoveToEnemy(enemy.transform);
-
+        move?.ReturnFormation();
     }
 
+    // =========================
+    // ENABLE / DISABLE
+    // =========================
 
     void OnEnable()
     {
-        lastAttackTime = 0;
-        isInPosition = false;
         enemy = null;
+        enemyHealth = null;
+        enemyShooter = null;
 
-        Invoke(nameof(TryFindEnemyImmediate), 0.05f);
+        isInPosition = false;
+        lastAttackTime = 0;
+        scanTimer = 0;
     }
 
     void OnDisable()
     {
-        if (enemy != null)
-        {
-            EnemyHeath eh = enemy.GetComponent<EnemyHeath>();
-            if (eh != null)
-                eh.OnEnemyDead -= StopCombat;
-        }
+        if (enemyHealth != null)
+            enemyHealth.OnEnemyDead -= StopCombat;
 
         enemy = null;
     }

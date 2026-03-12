@@ -18,7 +18,14 @@ public class EnemyCombat : MonoBehaviour
 
     public CombatState state = CombatState.Walking;
     public bool IsLocked { get; private set; }
+    //COMBAT SLOT
+    private Transform[] meleeSlots = new Transform[2];
 
+    private Vector3[] slotOffsets =
+    {
+        new Vector3(-0.6f, 0),
+        new Vector3(0.6f, 0)
+    };
 
     void Awake()
     {
@@ -59,6 +66,41 @@ public class EnemyCombat : MonoBehaviour
         {
             ResetToWalking();
         }
+    }
+    // hàm lấy slot trống
+    public int TryGetSlot(Transform soldier)
+    {
+        for (int i = 0; i < meleeSlots.Length; i++)
+        {
+            if (meleeSlots[i] == null)
+            {
+                meleeSlots[i] = soldier;
+                return i;
+            }
+        }
+
+        return -1;
+    }
+    // hàm giải phóng slot
+    public void ReleaseSlot(Transform soldier)
+    {
+        for (int i = 0; i < meleeSlots.Length; i++)
+        {
+            if (meleeSlots[i] == soldier)
+            {
+                meleeSlots[i] = null;
+                return;
+            }
+        }
+    }
+    // hàm lấy vị trí slot
+    public Vector3 GetSlotPosition(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= slotOffsets.Length)
+        {
+            return transform.position;
+        }
+        return transform.position + slotOffsets[slotIndex];
     }
 
     public void OnDead()
@@ -113,8 +155,8 @@ public class EnemyCombat : MonoBehaviour
 
         enemyMove.StopMove();
 
-        EnemyShooter shooter = GetComponent<EnemyShooter>();
-        if (shooter != null) shooter.enabled = false;
+        // EnemyShooter shooter = GetComponent<EnemyShooter>();
+        // if (shooter != null) shooter.enabled = false;
     }
 
 
@@ -141,15 +183,25 @@ public class EnemyCombat : MonoBehaviour
             detectRange,
             LayerMask.GetMask("Defense")
         );
-
+        float closest = Mathf.Infinity;
+        DefenseHealth best = null;
+        
         foreach (var hit in hits)
         {
             DefenseHealth defense = hit.GetComponent<DefenseHealth>();
-            if (defense != null)
-                return defense;
+            if (defense == null)continue;
+
+            float dist = Vector2.Distance(transform.position, defense.transform.position);
+
+            if (dist < closest)
+            {
+                closest = dist;
+                best = defense;
+            }
+
         }
 
-        return null;
+        return best;
     }
 
     public void OnSoldierDead()
@@ -182,7 +234,7 @@ public class EnemyCombat : MonoBehaviour
     {
         if (IsLocked) return;
 
-        IsLocked = true;
+        
         soldier = heroTf;
         state = CombatState.Waiting;
 
